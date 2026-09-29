@@ -1,0 +1,20 @@
+{
+  "identifier" : "C41A7AC0-061F-48CA-A965-2F588C5885D4",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "10.00",
+      "familyShareable" : false,
+      "internalID" : "1234567890",
+      "localizations" : [
+        { "description" : "Unlock automatic sync and historical imports.", "displayName" : "Lifetime Unlock", "locale" : "en_US" }
+      ],
+      "productID" : "com.marynavdovenko.HAHealthSync.lifetimeUnlock",
+      "referenceName" : "Lifetime Unlock",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : { "_failTransactionsEnabled" : false, "_locale" : "en_US", "_storefront" : "USA" },
+  "subscriptionGroups" : [],
+  "version" : { "major" : 3, "minor" : 0 }
+}

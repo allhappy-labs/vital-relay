@@ -1,0 +1,503 @@
+{
+  "catalog_version": 1,
+  "protocol_version": 2,
+  "app_source_commit": "52f9a07f7af0373e521a1aebfeb60833c4f0ff25",
+  "canonical_unit_contract": "Quantity tokens are app UnitSymbol.rawValue for healthKitUnit, not HKUnit.unitString; categories/workouts have no quantity unit.",
+  "sources": [
+    {
+      "sample_type": "HKQuantityTypeIdentifierStepCount",
+      "payload_kind": "quantity",
+      "canonical_unit": "count"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceWalkingRunning",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierActiveEnergyBurned",
+      "payload_kind": "quantity",
+      "canonical_unit": "kcal"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBasalEnergyBurned",
+      "payload_kind": "quantity",
+      "canonical_unit": "kcal"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierFlightsClimbed",
+      "payload_kind": "quantity",
+      "canonical_unit": "count"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierAppleExerciseTime",
+      "payload_kind": "quantity",
+      "canonical_unit": "min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierAppleStandTime",
+      "payload_kind": "quantity",
+      "canonical_unit": "min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierTimeInDaylight",
+      "payload_kind": "quantity",
+      "canonical_unit": "min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWalkingSpeed",
+      "payload_kind": "quantity",
+      "canonical_unit": "m/s"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWalkingStepLength",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWalkingAsymmetryPercentage",
+      "payload_kind": "quantity",
+      "canonical_unit": "fraction"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWalkingDoubleSupportPercentage",
+      "payload_kind": "quantity",
+      "canonical_unit": "fraction"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceSwimming",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceCycling",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRunningPower",
+      "payload_kind": "quantity",
+      "canonical_unit": "W"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRunningStrideLength",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRunningGroundContactTime",
+      "payload_kind": "quantity",
+      "canonical_unit": "ms"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRunningVerticalOscillation",
+      "payload_kind": "quantity",
+      "canonical_unit": "cm"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierCyclingPower",
+      "payload_kind": "quantity",
+      "canonical_unit": "W"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierCyclingCadence",
+      "payload_kind": "quantity",
+      "canonical_unit": "rpm"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierCyclingSpeed",
+      "payload_kind": "quantity",
+      "canonical_unit": "m/s"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRunningSpeed",
+      "payload_kind": "quantity",
+      "canonical_unit": "m/s"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierCyclingFunctionalThresholdPower",
+      "payload_kind": "quantity",
+      "canonical_unit": "W"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierSwimmingStrokeCount",
+      "payload_kind": "quantity",
+      "canonical_unit": "count"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierUnderwaterDepth",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWaterTemperature",
+      "payload_kind": "quantity",
+      "canonical_unit": "degC"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWorkoutEffortScore",
+      "payload_kind": "quantity",
+      "canonical_unit": "appleEffortScore"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierEstimatedWorkoutEffortScore",
+      "payload_kind": "quantity",
+      "canonical_unit": "appleEffortScore"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceRowing",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistancePaddleSports",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceCrossCountrySkiing",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceDownhillSnowSports",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDistanceSkatingSports",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierAppleWalkingSteadiness",
+      "payload_kind": "quantity",
+      "canonical_unit": "fraction"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierHeartRateRecoveryOneMinute",
+      "payload_kind": "quantity",
+      "canonical_unit": "count/min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierPhysicalEffort",
+      "payload_kind": "quantity",
+      "canonical_unit": "MET"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierInsulinDelivery",
+      "payload_kind": "quantity",
+      "canonical_unit": "IU"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierSixMinuteWalkTestDistance",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierStairAscentSpeed",
+      "payload_kind": "quantity",
+      "canonical_unit": "m/s"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierStairDescentSpeed",
+      "payload_kind": "quantity",
+      "canonical_unit": "m/s"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBodyMass",
+      "payload_kind": "quantity",
+      "canonical_unit": "kg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierHeight",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBodyFatPercentage",
+      "payload_kind": "quantity",
+      "canonical_unit": "fraction"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierLeanBodyMass",
+      "payload_kind": "quantity",
+      "canonical_unit": "kg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWaistCircumference",
+      "payload_kind": "quantity",
+      "canonical_unit": "m"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBodyTemperature",
+      "payload_kind": "quantity",
+      "canonical_unit": "degC"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierHeartRate",
+      "payload_kind": "quantity",
+      "canonical_unit": "count/min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRestingHeartRate",
+      "payload_kind": "quantity",
+      "canonical_unit": "count/min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierWalkingHeartRateAverage",
+      "payload_kind": "quantity",
+      "canonical_unit": "count/min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierHeartRateVariabilitySDNN",
+      "payload_kind": "quantity",
+      "canonical_unit": "ms"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierOxygenSaturation",
+      "payload_kind": "quantity",
+      "canonical_unit": "fraction"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierRespiratoryRate",
+      "payload_kind": "quantity",
+      "canonical_unit": "breaths/min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierVO2Max",
+      "payload_kind": "quantity",
+      "canonical_unit": "mL/kg/min"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierAppleSleepingWristTemperature",
+      "payload_kind": "quantity",
+      "canonical_unit": "degC"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBloodPressureSystolic",
+      "payload_kind": "quantity",
+      "canonical_unit": "mmHg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBloodPressureDiastolic",
+      "payload_kind": "quantity",
+      "canonical_unit": "mmHg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierUVExposure",
+      "payload_kind": "quantity",
+      "canonical_unit": "unitless"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierHeadphoneAudioExposure",
+      "payload_kind": "quantity",
+      "canonical_unit": "dBA"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierEnvironmentalAudioExposure",
+      "payload_kind": "quantity",
+      "canonical_unit": "dBA"
+    },
+    {
+      "sample_type": "HKCategoryTypeIdentifierSleepAnalysis",
+      "payload_kind": "category",
+      "canonical_unit": null
+    },
+    {
+      "sample_type": "HKCategoryTypeIdentifierMindfulSession",
+      "payload_kind": "category",
+      "canonical_unit": null
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryWater",
+      "payload_kind": "quantity",
+      "canonical_unit": "mL"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryEnergyConsumed",
+      "payload_kind": "quantity",
+      "canonical_unit": "kcal"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierBloodGlucose",
+      "payload_kind": "quantity",
+      "canonical_unit": "mmol/L"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryCarbohydrates",
+      "payload_kind": "quantity",
+      "canonical_unit": "g"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryFatTotal",
+      "payload_kind": "quantity",
+      "canonical_unit": "g"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryProtein",
+      "payload_kind": "quantity",
+      "canonical_unit": "g"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryFiber",
+      "payload_kind": "quantity",
+      "canonical_unit": "g"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietarySugar",
+      "payload_kind": "quantity",
+      "canonical_unit": "g"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryCholesterol",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryCalcium",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryChloride",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryIron",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryMagnesium",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryManganese",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryPhosphorus",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryPotassium",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietarySodium",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryZinc",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryCaffeine",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryCopper",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryNiacin",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryPantothenicAcid",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryRiboflavin",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryThiamin",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminB6",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminC",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminE",
+      "payload_kind": "quantity",
+      "canonical_unit": "mg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryBiotin",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryChromium",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryFolate",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryIodine",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryMolybdenum",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietarySelenium",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminA",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminB12",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminD",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKQuantityTypeIdentifierDietaryVitaminK",
+      "payload_kind": "quantity",
+      "canonical_unit": "µg"
+    },
+    {
+      "sample_type": "HKWorkoutType",
+      "payload_kind": "workout",
+      "canonical_unit": null
+    }
+  ]
+}

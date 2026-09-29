@@ -1,0 +1,6 @@
+{
+  "base_url": "https://homeassistant.example.com",
+  "health_bridge_user_id": "example-user",
+  "health_bridge_webhook_secret": "example-secret",
+  "home_assistant_access_token": "example-access-token"
+}

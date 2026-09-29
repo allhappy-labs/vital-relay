@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "applied": false,
+  "error": "no_entities_applied",
+  "request_type": "live",
+  "protocol_version": 1,
+  "request_id": "live.01234567-89ab-cdef-0123-456789abcdef",
+  "received_entities": 1,
+  "updated_entities": 0,
+  "skipped_entities": 1
+}

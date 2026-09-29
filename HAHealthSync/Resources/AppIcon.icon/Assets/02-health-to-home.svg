@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="send-ribbon" x1="195" y1="395" x2="875" y2="325" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF3958"/>
+      <stop offset="0.52" stop-color="#FF5963"/>
+      <stop offset="1" stop-color="#FF8B79"/>
+    </linearGradient>
+    <linearGradient id="send-highlight" x1="240" y1="350" x2="830" y2="278" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD1BD" stop-opacity="0.15"/>
+      <stop offset="0.55" stop-color="#FFF0E8" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(512 512) scale(1.06 1.03) translate(-512 -512)">
+    <path d="M194 469C165 456 152 422 167 392C287 151 617 106 804 280L795 238C792 226 805 218 815 226L936 329C952 343 947 365 927 371L768 419C754 423 743 411 748 397L764 353C591 216 321 254 226 439C219 453 207 474 194 469Z" fill="url(#send-ribbon)"/>
+    <path d="M220 397C348 190 625 167 781 294" fill="none" stroke="url(#send-highlight)" stroke-width="19" stroke-linecap="round"/>
+  </g>
+</svg>

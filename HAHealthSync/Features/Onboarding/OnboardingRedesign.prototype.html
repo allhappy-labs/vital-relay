@@ -1,0 +1,336 @@
+<!doctype html>
+<!-- PROTOTYPE — Native iOS 26 onboarding flow. Sample state only. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Privacy · Health Sync Onboarding Prototype</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07090e;
+        --surface: rgba(31, 32, 39, .94);
+        --text: #f7f8fc;
+        --muted: rgba(235, 239, 250, .58);
+        --faint: rgba(235, 239, 250, .34);
+        --cyan: #56d9ff;
+        --green: #49e0a5;
+        --red: #ff6961;
+        --orange: #ff9f58;
+        --purple: #b490ff;
+        --hairline: rgba(255,255,255,.08);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { min-height: 100%; }
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 12% 10%, rgba(43, 135, 255, .22), transparent 29rem),
+          radial-gradient(circle at 92% 75%, rgba(52, 225, 181, .11), transparent 30rem),
+          var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      [hidden] { display: none !important; }
+
+      .stage { min-height: 100vh; display: grid; place-items: start center; padding: 28px 20px 80px; }
+      .device {
+        position: relative;
+        width: min(100%, 430px);
+        min-height: 880px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 48px;
+        background:
+          radial-gradient(circle at -10% 12%, rgba(42,130,255,.23), transparent 33%),
+          radial-gradient(circle at 110% 52%, rgba(55,225,184,.12), transparent 31%),
+          linear-gradient(160deg, #111722 0%, #080b11 42%, #0b0e15 100%);
+        box-shadow: 0 36px 100px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.08);
+      }
+      .status-bar { height: 48px; padding: 17px 28px 0; display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+      .system-icons { display: flex; align-items: center; gap: 7px; }
+      .battery { width: 20px; height: 10px; padding: 1.5px; border: 1px solid rgba(255,255,255,.8); border-radius: 3px; }
+      .battery::before { content: ""; display: block; width: 73%; height: 100%; border-radius: 1px; background: white; }
+      .screen { position: relative; min-height: 832px; padding: 6px 18px 112px; }
+
+      .step-page { display: none; animation: reveal 220ms ease-out both; }
+      .step-page.active { display: block; }
+      @keyframes reveal { from { opacity: 0; transform: translateX(4px); } }
+
+      .navigation { min-height: 62px; margin: 0 4px 12px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+      .back-button { min-width: 65px; min-height: 36px; border: 0; padding: 0; color: var(--cyan); background: transparent; text-align: left; font-size: 15px; font-weight: 620; }
+      .back-placeholder { min-width: 65px; }
+      .navigation-title { flex: 1; text-align: center; font-size: 16px; font-weight: 700; }
+      .step-count { min-width: 65px; color: var(--muted); text-align: right; font-size: 12px; font-weight: 650; }
+      .progress-track { height: 3px; margin: 0 4px 21px; overflow: hidden; border-radius: 99px; background: rgba(118,118,128,.25); }
+      .progress-value { width: 33.333%; height: 100%; border-radius: inherit; background: var(--cyan); transition: width 180ms ease; }
+
+      h1 { margin: 0; font-size: 31px; line-height: 1.08; letter-spacing: -.04em; }
+      p { margin: 0; }
+      .hero { padding: 8px 6px 4px; }
+      .hero-symbol { width: 64px; height: 64px; margin-bottom: 19px; display: grid; place-items: center; border-radius: 20px; color: var(--cyan); background: rgba(86,217,255,.13); font-size: 31px; }
+      .hero-copy { margin-top: 13px; color: var(--muted); font-size: 14px; line-height: 1.48; }
+
+      .section { margin-top: 19px; }
+      .section-label { margin: 0 5px 8px; color: var(--muted); font-size: 11px; font-weight: 720; letter-spacing: .08em; text-transform: uppercase; }
+      .group { overflow: hidden; border-radius: 13px; background: var(--surface); }
+      .row { position: relative; min-height: 52px; padding: 9px 12px; display: flex; align-items: center; gap: 11px; }
+      .row + .row::before { content: ""; position: absolute; top: 0; left: 12px; right: 0; height: 1px; background: var(--hairline); }
+      .row-symbol { width: 26px; flex: 0 0 26px; color: var(--accent, var(--cyan)); text-align: center; font-size: 15px; }
+      .row-label { min-width: 0; flex: 1; font-size: 14px; }
+      .row-value { color: var(--muted); font-size: 12px; text-align: right; }
+      .footer { margin: 7px 12px 0; color: var(--muted); font-size: 10px; line-height: 1.42; }
+
+      .selection-toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 42px; padding: 0 4px; }
+      .selection-count { color: var(--muted); font-size: 13px; font-weight: 650; }
+      .bulk-actions { display: flex; gap: 14px; }
+      .text-button { border: 0; padding: 7px 0; color: var(--cyan); background: transparent; font-size: 13px; font-weight: 680; }
+      .metric-list { overflow: hidden; border-radius: 13px; background: var(--surface); }
+      .metric-row { position: relative; min-height: 50px; padding: 7px 12px; display: flex; align-items: center; gap: 10px; }
+      .metric-row + .metric-row::before { content: ""; position: absolute; top: 0; left: 49px; right: 0; height: 1px; background: var(--hairline); }
+      .metric-symbol { width: 27px; height: 27px; flex: 0 0 27px; display: grid; place-items: center; border-radius: 8px; color: white; background: var(--accent, #4a91ff); font-size: 12px; font-weight: 800; }
+      .metric-name { min-width: 0; flex: 1; font-size: 14px; }
+
+      .native-toggle { position: relative; flex: 0 0 49px; width: 49px; height: 29px; }
+      .native-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+      .toggle-track { position: absolute; inset: 0; border-radius: 999px; background: rgba(120,120,128,.32); transition: background 160ms ease; }
+      .toggle-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 25px; height: 25px; border-radius: 50%; background: white; box-shadow: 0 2px 7px rgba(0,0,0,.35); transition: transform 160ms ease; }
+      .native-toggle input:checked + .toggle-track { background: #30d158; }
+      .native-toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+      .form-input { min-width: 0; max-width: 64%; border: 0; outline: 0; color: var(--cyan); background: transparent; text-align: right; font-size: 13px; }
+      .test-button { width: 100%; min-height: 50px; border: 0; padding: 0 12px; color: var(--cyan); background: transparent; text-align: left; font-size: 14px; font-weight: 630; }
+      .test-button:disabled { color: var(--faint); cursor: default; }
+      .test-result { color: var(--muted); font-size: 12px; }
+      .test-result.good { color: var(--green); }
+      .test-result.failed { color: var(--red); }
+      .validation { margin: 8px 12px 0; color: var(--red); font-size: 11px; line-height: 1.4; }
+
+      .bottom-bar { position: fixed; z-index: 8; left: 50%; bottom: 0; width: min(100%, 430px); transform: translateX(-50%); padding: 20px 18px max(13px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(7,9,14,.9) 30%, rgba(7,9,14,.98)); }
+      .primary-button { width: 100%; min-height: 50px; border: 0; border-radius: 14px; color: #06131b; background: var(--cyan); font-size: 15px; font-weight: 760; }
+      .primary-button:disabled { opacity: .36; cursor: default; }
+
+      .alert-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,.46); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+      .native-alert { width: min(100%, 285px); overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 16px; background: rgba(46,46,49,.94); box-shadow: 0 20px 60px rgba(0,0,0,.45); text-align: center; }
+      .alert-copy { padding: 19px 18px 16px; }
+      .alert-copy h2 { margin: 0; font-size: 16px; }
+      .alert-copy p { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+      .alert-actions { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hairline); }
+      .alert-actions button { min-height: 46px; border: 0; color: var(--cyan); background: transparent; font-size: 13px; }
+      .alert-actions button + button { border-left: 1px solid var(--hairline); font-weight: 700; }
+      .prototype-note { margin: 20px 4px 0; color: var(--faint); text-align: center; font-size: 10px; }
+
+      @media (max-width: 520px) {
+        .stage { display: block; padding: 0; }
+        .device { width: 100%; min-height: 100vh; border: 0; border-radius: 0; box-shadow: none; }
+        .screen { min-height: calc(100vh - 48px); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage">
+      <div class="device">
+        <div class="status-bar" aria-hidden="true"><span>9:41</span><span class="system-icons"><span>▮▮▮▮</span><span>⌁</span><span class="battery"></span></span></div>
+        <div class="screen">
+          <header class="navigation"><button class="back-button" id="step-back" type="button" hidden>‹ Back</button><span class="back-placeholder" id="step-back-placeholder"></span><span class="navigation-title" id="navigation-title">Privacy</span><span class="step-count" id="step-count">Step 1 of 3</span></header>
+          <div class="progress-track" aria-hidden="true"><div class="progress-value" id="progress-value"></div></div>
+
+          <section class="step-page" data-step="privacy" aria-label="Privacy">
+            <div class="hero"><div class="hero-symbol" aria-hidden="true">♥︎</div><h1>Your Health Data Stays Under Your Control</h1><p class="hero-copy">Health Sync processes data on this iPhone and sends it directly to your own Home Assistant instance. There are no accounts, analytics, advertisements, cloud storage, or external servers.</p></div>
+            <div class="section"><p class="section-label">Privacy</p><div class="group">
+              <div class="row"><span class="row-symbol">◆</span><span class="row-label">Credentials stay in the iOS Keychain</span></div>
+              <div class="row"><span class="row-symbol" style="--accent: var(--green)">✓</span><span class="row-label">Only selected health types are requested</span></div>
+              <div class="row"><span class="row-symbol" style="--accent: var(--purple)">◉</span><span class="row-label">Health values are excluded from app logs</span></div>
+            </div></div>
+            <p class="prototype-note">PROTOTYPE · Fully native SwiftUI in production</p>
+          </section>
+
+          <section class="step-page" data-step="metrics" aria-label="Choose Metrics">
+            <div class="selection-toolbar"><span class="selection-count" id="selection-count">0 selected</span><span class="bulk-actions"><button class="text-button" id="select-all" type="button">Select All</button><button class="text-button" id="clear-all" type="button">Clear</button></span></div>
+            <div class="section"><p class="section-label">Activity</p><div class="metric-list">
+              <label class="metric-row"><span class="metric-symbol">◆</span><span class="metric-name">Steps</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--green)">↗</span><span class="metric-name">Walking + Running Distance</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--orange)">◒</span><span class="metric-name">Active Calories</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--red)">●</span><span class="metric-name">Exercise Time</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <div class="section"><p class="section-label">Body &amp; Vitals</p><div class="metric-list">
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--orange)">●</span><span class="metric-name">Body Weight</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--red)">♥</span><span class="metric-name">Heart Rate</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--red)">♥</span><span class="metric-name">Resting Heart Rate</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol">O₂</span><span class="metric-name">Oxygen Saturation</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <div class="section"><p class="section-label">Sleep</p><div class="metric-list">
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">Sleep Duration</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">Deep Sleep</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">REM Sleep</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <p class="footer">iOS asks only for read access to the health types selected here.</p>
+          </section>
+
+          <section class="step-page" data-step="connect" aria-label="Connect">
+            <div class="section"><p class="section-label">Home Assistant</p><div class="group">
+              <label class="row"><span class="row-label">Base URL</span><input class="form-input" id="base-url" type="url" value="https://homeassistant.local:8123" autocomplete="url" autocapitalize="none" /></label>
+              <label class="row"><span class="row-label">Health Bridge User ID</span><input class="form-input" id="user-id" type="text" value="health_bridge_user" autocomplete="off" autocapitalize="none" /></label>
+            </div><p class="validation" id="connection-validation" hidden>Enter both the Base URL and Health Bridge User ID.</p></div>
+
+            <div class="section"><p class="section-label">Health Bridge Webhook</p><div class="group">
+              <label class="row"><span class="row-label">Webhook Secret</span><input class="form-input" id="webhook-secret" type="password" placeholder="Required" autocomplete="new-password" /></label>
+              <button class="test-button" id="test-webhook" type="button" disabled>Test Health Bridge Webhook</button>
+              <div class="row" id="webhook-result" hidden><span class="test-result"></span></div>
+            </div></div>
+
+            <div class="section"><p class="section-label">Home Assistant API</p><div class="group">
+              <label class="row"><span class="row-label">Long-Lived Access Token</span><input class="form-input" id="access-token" type="password" placeholder="Required" autocomplete="new-password" /></label>
+              <button class="test-button" id="test-api" type="button" disabled>Test Authenticated API</button>
+              <div class="row" id="api-result" hidden><span class="test-result"></span></div>
+            </div></div>
+
+            <div class="section"><p class="section-label">Security</p><div class="group"><label class="row"><span class="row-label">Allow Confirmed Local HTTP</span><span class="native-toggle"><input id="local-http" type="checkbox" /><span class="toggle-track"></span></span></label></div><p class="footer">Remote addresses must use HTTPS. Both credential tests must succeed before continuing.</p></div>
+            <p class="prototype-note">PROTOTYPE · Secure fields never reveal their values</p>
+          </section>
+        </div>
+
+        <div class="bottom-bar"><button class="primary-button" id="primary-action" type="button">Continue</button></div>
+      </div>
+    </main>
+
+    <div class="alert-backdrop" id="http-alert" hidden><div class="native-alert" role="alertdialog" aria-modal="true" aria-labelledby="http-alert-title"><div class="alert-copy"><h2 id="http-alert-title">Local HTTP Is Not Encrypted</h2><p>Only use HTTP for a Home Assistant address on your trusted local network. Remote addresses must use HTTPS.</p></div><div class="alert-actions"><button id="http-cancel" type="button">Cancel</button><button id="http-allow" type="button">Allow Local HTTP</button></div></div></div>
+
+    <script>
+      const steps = ["privacy", "metrics", "connect"];
+      const titles = { privacy: "Privacy", metrics: "Choose Metrics", connect: "Connect" };
+      let webhookPassed = false;
+      let apiPassed = false;
+
+      function requestedStep() {
+        const requested = new URLSearchParams(location.search).get("step") ?? "privacy";
+        return steps.includes(requested) ? requested : "privacy";
+      }
+
+      function goToStep(step) {
+        const previous = requestedStep();
+        if (previous === "connect" && step !== "connect") clearConnectionCredentials();
+        const url = new URL(location.href);
+        if (step === "privacy") url.searchParams.delete("step"); else url.searchParams.set("step", step);
+        history.replaceState({}, "", url);
+        renderStep();
+        scrollTo({ top: 0, behavior: "auto" });
+      }
+
+      function renderStep() {
+        const step = requestedStep();
+        const index = steps.indexOf(step);
+        document.querySelectorAll(".step-page").forEach((page) => page.classList.toggle("active", page.dataset.step === step));
+        document.querySelector("#navigation-title").textContent = titles[step];
+        document.querySelector("#step-count").textContent = `Step ${index + 1} of 3`;
+        document.querySelector("#progress-value").style.width = `${((index + 1) / 3) * 100}%`;
+        document.querySelector("#step-back").hidden = index === 0;
+        document.querySelector("#step-back-placeholder").hidden = index !== 0;
+        const action = document.querySelector("#primary-action");
+        action.textContent = step === "privacy" ? "Continue" : step === "metrics" ? "Request Health Access" : "Save and Continue";
+        updatePrimaryAction();
+        document.title = `${titles[step]} · Health Sync Onboarding Prototype`;
+      }
+
+      function updatePrimaryAction() {
+        const step = requestedStep();
+        const action = document.querySelector("#primary-action");
+        if (step === "privacy") {
+          action.disabled = false;
+        } else if (step === "metrics") {
+          action.disabled = ![...document.querySelectorAll('[data-step="metrics"] input[type="checkbox"]')].some((toggle) => toggle.checked);
+        } else {
+          const baseURL = document.querySelector("#base-url").value.trim();
+          const userID = document.querySelector("#user-id").value.trim();
+          const secret = document.querySelector("#webhook-secret").value.trim();
+          const token = document.querySelector("#access-token").value.trim();
+          action.disabled = !baseURL || !userID || !secret || !token || !webhookPassed || !apiPassed;
+        }
+      }
+
+      document.querySelector("#step-back").addEventListener("click", () => {
+        const index = steps.indexOf(requestedStep());
+        if (index > 0) goToStep(steps[index - 1]);
+      });
+      document.querySelector("#primary-action").addEventListener("click", () => {
+        const step = requestedStep();
+        if (step === "privacy") goToStep("metrics");
+        else if (step === "metrics") goToStep("connect");
+        else location.href = "../Dashboard/DashboardHomeRedesign.prototype.html?variant=C";
+      });
+
+      const metricToggles = [...document.querySelectorAll('[data-step="metrics"] input[type="checkbox"]')];
+      function updateMetricSelection() {
+        const selected = metricToggles.filter((toggle) => toggle.checked).length;
+        document.querySelector("#selection-count").textContent = `${selected} selected`;
+        updatePrimaryAction();
+      }
+      metricToggles.forEach((toggle) => toggle.addEventListener("change", updateMetricSelection));
+      document.querySelector("#select-all").addEventListener("click", () => { metricToggles.forEach((toggle) => toggle.checked = true); updateMetricSelection(); });
+      document.querySelector("#clear-all").addEventListener("click", () => { metricToggles.forEach((toggle) => toggle.checked = false); updateMetricSelection(); });
+
+      function resetTest(context) {
+        if (context === "webhook") webhookPassed = false; else apiPassed = false;
+        const field = document.querySelector(context === "webhook" ? "#webhook-secret" : "#access-token");
+        const button = document.querySelector(context === "webhook" ? "#test-webhook" : "#test-api");
+        const result = document.querySelector(context === "webhook" ? "#webhook-result" : "#api-result");
+        button.disabled = field.value.trim().length === 0;
+        result.hidden = true;
+        updatePrimaryAction();
+      }
+      function clearConnectionCredentials() {
+        document.querySelector("#webhook-secret").value = "";
+        document.querySelector("#access-token").value = "";
+        webhookPassed = false;
+        apiPassed = false;
+        document.querySelector("#test-webhook").disabled = true;
+        document.querySelector("#test-api").disabled = true;
+        document.querySelector("#webhook-result").hidden = true;
+        document.querySelector("#api-result").hidden = true;
+      }
+      document.querySelector("#webhook-secret").addEventListener("input", () => resetTest("webhook"));
+      document.querySelector("#access-token").addEventListener("input", () => resetTest("api"));
+      ["base-url", "user-id"].forEach((id) => document.querySelector(`#${id}`).addEventListener("input", () => {
+        const valid = document.querySelector("#base-url").value.trim() && document.querySelector("#user-id").value.trim();
+        document.querySelector("#connection-validation").hidden = Boolean(valid);
+        updatePrimaryAction();
+      }));
+
+      function runTest(context) {
+        const button = document.querySelector(context === "webhook" ? "#test-webhook" : "#test-api");
+        const result = document.querySelector(context === "webhook" ? "#webhook-result" : "#api-result");
+        const label = result.querySelector(".test-result");
+        button.disabled = true;
+        result.hidden = false;
+        label.className = "test-result";
+        label.textContent = "◷  Testing…";
+        setTimeout(() => {
+          if (context === "webhook") webhookPassed = true; else apiPassed = true;
+          label.className = "test-result good";
+          label.textContent = context === "webhook" ? "✓  Connection succeeded · Integration Version 1" : "✓  Connection succeeded";
+          button.disabled = false;
+          updatePrimaryAction();
+        }, 450);
+      }
+      document.querySelector("#test-webhook").addEventListener("click", () => runTest("webhook"));
+      document.querySelector("#test-api").addEventListener("click", () => runTest("api"));
+
+      document.querySelector("#local-http").addEventListener("change", (event) => {
+        if (event.target.checked) {
+          event.target.checked = false;
+          document.querySelector("#http-alert").hidden = false;
+        }
+      });
+      document.querySelector("#http-cancel").addEventListener("click", () => { document.querySelector("#http-alert").hidden = true; });
+      document.querySelector("#http-allow").addEventListener("click", () => { document.querySelector("#http-alert").hidden = true; document.querySelector("#local-http").checked = true; });
+
+      updateMetricSelection();
+      renderStep();
+    </script>
+  </body>
+</html>

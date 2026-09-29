@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="heart-fill" x1="145" y1="390" x2="425" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB29A"/>
+      <stop offset="0.42" stop-color="#FF6D69"/>
+      <stop offset="1" stop-color="#FF385A"/>
+    </linearGradient>
+    <linearGradient id="house-fill" x1="710" y1="345" x2="710" y2="750" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#55F4F3"/>
+      <stop offset="0.48" stop-color="#19CDEB"/>
+      <stop offset="1" stop-color="#087FC7"/>
+    </linearGradient>
+    <linearGradient id="house-highlight" x1="604" y1="420" x2="805" y2="658" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E7FFFF" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <g>
+    <path d="M292 789C230 742 83 641 83 500C83 369 235 322 292 429C350 322 502 369 502 500C502 641 354 742 292 789Z" fill="url(#heart-fill)"/>
+    <path d="M115 470C152 378 248 380 292 451C329 391 408 374 458 436C406 397 344 415 292 487C238 419 170 420 115 470Z" fill="#FFF1E8" opacity="0.30"/>
+
+    <path d="M520 498L716 317L912 498V750H520V498Z" fill="url(#house-fill)"/>
+    <path d="M550 509L716 356L881 509V548L716 405L550 548Z" fill="url(#house-highlight)" opacity="0.48"/>
+    <path d="M552 498L716 348L880 498" fill="none" stroke="#85FFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.42"/>
+
+    <rect x="608" y="535" width="68" height="68" rx="12" fill="#FFF9E7"/>
+    <rect x="756" y="535" width="68" height="68" rx="12" fill="#FFF9E7"/>
+    <rect x="608" y="626" width="68" height="68" rx="12" fill="#FFF9E7"/>
+    <rect x="756" y="626" width="68" height="68" rx="12" fill="#FFF9E7"/>
+  </g>
+</svg>

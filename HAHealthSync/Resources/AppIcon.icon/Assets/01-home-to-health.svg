@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="return-ribbon" x1="850" y1="620" x2="170" y2="790" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#078DDB"/>
+      <stop offset="0.48" stop-color="#12CCE9"/>
+      <stop offset="1" stop-color="#18F2E7"/>
+    </linearGradient>
+    <linearGradient id="return-highlight" x1="780" y1="640" x2="235" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#63F7F1" stop-opacity="0"/>
+      <stop offset="0.62" stop-color="#A0FFF9" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#ECFFFF" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(512 512) scale(1.06 1.03) translate(-512 -512)">
+    <path d="M829 578C857 581 883 598 898 623C913 648 914 672 901 697C790 910 487 969 263 812L248 849C243 862 228 865 219 854L82 728C69 716 75 696 92 692L272 648C286 645 298 658 293 672L276 728C471 842 719 773 822 608C831 593 817 577 829 578Z" fill="url(#return-ribbon)"/>
+    <path d="M809 627C711 783 484 846 296 742" fill="none" stroke="url(#return-highlight)" stroke-width="19" stroke-linecap="round"/>
+  </g>
+</svg>

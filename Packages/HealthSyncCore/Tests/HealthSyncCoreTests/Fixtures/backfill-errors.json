@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "committed": false,
+  "protocol_version": 1,
+  "error": "unsupported_recorder",
+  "message": "Recorder backend is not supported"
+}

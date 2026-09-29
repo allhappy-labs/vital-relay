@@ -1,0 +1,12 @@
+{
+  "applied": true,
+  "integration_version": "1.2.1",
+  "last_sync_updated": true,
+  "ok": true,
+  "protocol_version": 1,
+  "received_entities": 1,
+  "request_id": "live.01234567-89ab-cdef-0123-456789abcdef",
+  "request_type": "live",
+  "skipped_entities": 0,
+  "updated_entities": 1
+}

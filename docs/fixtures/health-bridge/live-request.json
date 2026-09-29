@@ -1,0 +1,15 @@
+{
+  "data": {
+    "steps": [
+      {
+        "timestamp": "2026-08-27T20:00:00Z",
+        "value": 8421
+      }
+    ]
+  },
+  "protocol_version": 1,
+  "request_id": "live.01234567-89ab-cdef-0123-456789abcdef",
+  "request_type": "live",
+  "token": "example-secret",
+  "user_id": "example-user"
+}

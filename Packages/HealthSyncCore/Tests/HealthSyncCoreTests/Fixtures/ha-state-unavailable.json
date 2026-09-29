@@ -1,0 +1,9 @@
+{
+  "entity_id": "sensor.body_mass",
+  "state": "unavailable",
+  "attributes": {
+    "unit_of_measurement": "kg"
+  },
+  "last_changed": "2026-08-27T20:00:00Z",
+  "last_updated": "2026-08-27T20:00:01Z"
+}

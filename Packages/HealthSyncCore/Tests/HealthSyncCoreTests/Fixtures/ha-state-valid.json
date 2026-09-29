@@ -1,0 +1,10 @@
+{
+  "entity_id": "sensor.body_mass",
+  "state": "154.324",
+  "attributes": {
+    "unit_of_measurement": "lb",
+    "friendly_name": "Fixture body mass"
+  },
+  "last_changed": "2026-08-27T20:00:00.123456Z",
+  "last_updated": "2026-08-27T20:00:01Z"
+}

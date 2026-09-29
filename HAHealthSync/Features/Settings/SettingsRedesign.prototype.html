@@ -1,0 +1,1483 @@
+<!doctype html>
+<!-- PROTOTYPE — Direction-based Settings hub and grouping screens. Sample state only. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Settings · HA Health Sync Prototype</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #06080c;
+        --text: #f7f8fc;
+        --muted: rgba(235, 239, 250, 0.58);
+        --faint: rgba(235, 239, 250, 0.36);
+        --cyan: #56d9ff;
+        --blue: #4a91ff;
+        --green: #49e0a5;
+        --orange: #ff9f58;
+        --pink: #ff718d;
+        --purple: #b490ff;
+        --glass: rgba(24, 29, 40, 0.56);
+        --stroke: rgba(255, 255, 255, 0.13);
+        --hairline: rgba(255, 255, 255, 0.08);
+        --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { min-height: 100%; }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 18% 18%, rgba(29, 123, 255, 0.2), transparent 30rem),
+          radial-gradient(circle at 85% 78%, rgba(32, 226, 183, 0.12), transparent 28rem),
+          var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a { color: inherit; }
+
+      .stage {
+        min-height: 100vh;
+        display: grid;
+        place-items: start center;
+        padding: 28px 20px 80px;
+      }
+
+      .device {
+        position: relative;
+        width: min(100%, 430px);
+        min-height: 880px;
+        overflow: hidden;
+        border-radius: 48px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background:
+          radial-gradient(circle at -10% 12%, rgba(42, 130, 255, 0.23), transparent 33%),
+          radial-gradient(circle at 110% 52%, rgba(55, 225, 184, 0.12), transparent 31%),
+          linear-gradient(160deg, #111722 0%, #080b11 42%, #0b0e15 100%);
+        box-shadow: 0 36px 100px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.08);
+      }
+
+      .device::before {
+        content: "";
+        position: absolute;
+        z-index: 0;
+        top: -70px;
+        left: 80px;
+        width: 310px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(65, 146, 255, 0.25), transparent 67%);
+        filter: blur(28px);
+        pointer-events: none;
+      }
+
+      .status-bar {
+        position: relative;
+        z-index: 3;
+        height: 48px;
+        padding: 17px 28px 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .system-icons { display: flex; gap: 7px; align-items: center; }
+      .signal { letter-spacing: -2px; font-size: 10px; }
+      .battery {
+        width: 20px;
+        height: 10px;
+        border: 1px solid rgba(255,255,255,.8);
+        border-radius: 3px;
+        padding: 1.5px;
+      }
+      .battery::before { content: ""; display: block; width: 73%; height: 100%; border-radius: 1px; background: white; }
+
+      .screen {
+        position: relative;
+        z-index: 2;
+        min-height: 832px;
+        padding: 6px 18px 40px;
+      }
+
+      .page { display: none; animation: reveal 240ms ease-out both; }
+      .page.active { display: block; }
+      @keyframes reveal { from { opacity: 0; transform: translateY(4px); } }
+
+      .glass {
+        position: relative;
+        border: 1px solid var(--stroke);
+        background: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.035)), var(--glass);
+        box-shadow: var(--shadow), inset 0 1px rgba(255, 255, 255, 0.11);
+        backdrop-filter: blur(28px) saturate(180%);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+      }
+
+      .glass::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(115deg, rgba(255,255,255,.07), transparent 35%);
+        pointer-events: none;
+      }
+
+      .navigation {
+        min-height: 68px;
+        margin: 0 4px 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .back-link {
+        width: max-content;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        margin-left: -3px;
+        color: var(--cyan);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 620;
+      }
+
+      h1 {
+        margin: 3px 0 0;
+        font-size: 32px;
+        line-height: 1.08;
+        letter-spacing: -0.045em;
+      }
+
+      .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .toolbar-button { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; border-radius: 50%; color: var(--cyan); background: rgba(118,118,128,.2); text-decoration: none; font-size: 25px; font-weight: 350; }
+
+      h2 { margin: 0; font-size: 17px; letter-spacing: -0.02em; }
+      p { margin: 0; }
+
+      .root-intro {
+        margin: -4px 5px 17px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .settings-stack { display: grid; gap: 10px; }
+
+      .settings-card {
+        min-height: 112px;
+        border-radius: 27px;
+        padding: 15px;
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        text-decoration: none;
+      }
+
+      .icon-bubble {
+        position: relative;
+        z-index: 1;
+        width: 42px;
+        height: 42px;
+        border-radius: 15px;
+        display: grid;
+        place-items: center;
+        color: var(--accent, var(--cyan));
+        border: 1px solid color-mix(in srgb, var(--accent, var(--cyan)) 24%, transparent);
+        background: color-mix(in srgb, var(--accent, var(--cyan)) 14%, transparent);
+        box-shadow: inset 0 1px rgba(255, 255, 255, .1);
+        font-size: 18px;
+        font-weight: 720;
+      }
+
+      .card-copy { position: relative; z-index: 1; min-width: 0; }
+      .card-title { display: block; font-size: 16px; font-weight: 720; letter-spacing: -0.02em; }
+      .card-summary { display: block; margin-top: 3px; color: var(--accent, var(--cyan)); font-size: 12px; font-weight: 700; }
+      .card-description { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.3; }
+      .chevron { position: relative; z-index: 1; color: rgba(255,255,255,.38); font-size: 26px; font-weight: 250; }
+
+      .section-label {
+        margin: 18px 5px 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 720;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .settings-group { overflow: hidden; border-radius: 25px; }
+
+      .settings-row {
+        position: relative;
+        z-index: 1;
+        min-height: 56px;
+        padding: 11px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
+      button.settings-row { width: 100%; border: 0; color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+
+      .settings-row + .settings-row::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 14px;
+        right: 14px;
+        height: 1px;
+        background: var(--hairline);
+      }
+
+      .row-icon {
+        flex: 0 0 31px;
+        width: 31px;
+        height: 31px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        color: #061119;
+        background: var(--accent, var(--cyan));
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .row-label { min-width: 0; flex: 1; font-size: 14px; font-weight: 620; }
+      .row-value { color: var(--muted); font-size: 13px; text-align: right; }
+      .row-value.good { color: var(--green); font-weight: 700; }
+      .row-chevron { color: rgba(255,255,255,.34); font-size: 21px; }
+
+      .footer-copy {
+        margin: 9px 12px 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.42;
+      }
+
+      .callout {
+        margin-top: 14px;
+        padding: 15px;
+        border-radius: 22px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .callout .icon-bubble { flex: 0 0 36px; width: 36px; height: 36px; border-radius: 13px; font-size: 15px; }
+      .callout strong { display: block; font-size: 13px; }
+      .callout p { margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+      .direction-note {
+        margin-top: 15px;
+        padding: 13px 14px;
+        border: 1px solid var(--hairline);
+        border-radius: 19px;
+        color: var(--muted);
+        background: rgba(255,255,255,.035);
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .metric-toolbar {
+        margin-bottom: 15px;
+      }
+
+      .search-field {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 12px;
+        color: var(--muted);
+        background: rgba(118, 118, 128, .22);
+      }
+
+      .search-field span { margin-right: 8px; font-size: 14px; }
+      .search-field input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        color: var(--text);
+        background: transparent;
+        font: inherit;
+        font-size: 15px;
+      }
+      .search-field input::placeholder { color: var(--muted); }
+
+      .selection-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 44px;
+        margin-top: 8px;
+        padding: 0 4px;
+      }
+      .selection-count { color: var(--muted); font-size: 13px; font-weight: 650; }
+      .bulk-actions { display: flex; gap: 14px; }
+      .text-action { border: 0; padding: 7px 0; color: var(--cyan); background: transparent; font: inherit; font-size: 13px; font-weight: 680; cursor: pointer; }
+
+      .metric-section { margin-top: 16px; }
+      .metric-section[hidden], .metric-row[hidden] { display: none; }
+      .metric-list { overflow: hidden; border-radius: 13px; background: rgba(31, 32, 39, .94); }
+      .metric-row {
+        position: relative;
+        min-height: 52px;
+        padding: 7px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .metric-row + .metric-row::before { content: ""; position: absolute; top: 0; left: 49px; right: 0; height: 1px; background: var(--hairline); }
+      .metric-symbol { width: 27px; height: 27px; flex: 0 0 27px; display: grid; place-items: center; border-radius: 8px; color: white; background: var(--accent, var(--blue)); font-size: 12px; font-weight: 800; }
+      .metric-name { min-width: 0; flex: 1; font-size: 14px; }
+
+      .native-toggle { position: relative; flex: 0 0 49px; width: 49px; height: 29px; }
+      .native-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+      .toggle-track { position: absolute; inset: 0; border-radius: 999px; background: rgba(120, 120, 128, .32); transition: background 160ms ease; cursor: pointer; }
+      .toggle-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 25px; height: 25px; border-radius: 50%; background: white; box-shadow: 0 2px 7px rgba(0,0,0,.35); transition: transform 160ms ease; }
+      .native-toggle input:checked + .toggle-track { background: #30d158; }
+      .native-toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+      .native-toggle input:focus-visible + .toggle-track { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+      .save-bar { position: sticky; bottom: 0; margin: 20px -18px -40px; padding: 11px 18px max(12px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(7, 9, 14, .88) 26%, rgba(7, 9, 14, .96)); }
+      .save-button { width: 100%; min-height: 50px; border: 0; border-radius: 999px; color: #06131b; background: linear-gradient(145deg, #88ebff, #4f9eff); box-shadow: 0 10px 28px rgba(64, 157, 255, .24), inset 0 1px rgba(255,255,255,.75); font: inherit; font-size: 15px; font-weight: 780; cursor: pointer; }
+      .save-button:disabled { opacity: .38; cursor: default; }
+
+      .pairing-row { min-height: 78px; }
+      .pairing-copy { min-width: 0; flex: 1; }
+      .pairing-title { display: block; font-size: 14px; font-weight: 650; }
+      .pairing-entity { display: block; margin-top: 3px; overflow: hidden; color: var(--muted); font-family: ui-monospace, "SF Mono", monospace; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+      .pairing-status { display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; color: var(--muted); font-size: 10px; }
+      .pairing-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
+      .pairing-status.enabled { color: var(--green); }
+      .pairing-status.enabled::before { background: var(--green); }
+
+      .empty-state { padding: 42px 24px; text-align: center; }
+      .empty-state[hidden], .pairing-list[hidden] { display: none; }
+      .empty-symbol { width: 58px; height: 58px; margin: 0 auto 14px; display: grid; place-items: center; border-radius: 50%; color: var(--muted); background: rgba(118,118,128,.18); font-size: 24px; }
+      .empty-state h2 { font-size: 18px; }
+      .empty-state p { max-width: 250px; margin: 6px auto 17px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+      .empty-action { min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; color: #06131b; background: var(--cyan); font: inherit; font-size: 13px; font-weight: 750; }
+
+      .prototype-state-switcher { margin: 18px auto 0; width: max-content; display: flex; padding: 3px; border-radius: 10px; background: rgba(118,118,128,.22); }
+      .prototype-state-switcher a { min-height: 30px; padding: 7px 11px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 10px; font-weight: 680; }
+      .prototype-state-switcher a.active { color: var(--text); background: rgba(118,118,128,.48); }
+
+      .toolbar-save { min-height: 38px; border: 0; padding: 0 2px; color: var(--cyan); background: transparent; font: inherit; font-size: 15px; font-weight: 720; cursor: pointer; }
+      .form-section { margin-top: 18px; }
+      .form-group { overflow: hidden; border-radius: 13px; background: rgba(31, 32, 39, .94); }
+      .form-row { position: relative; min-height: 52px; padding: 9px 12px; display: flex; align-items: center; gap: 12px; }
+      .form-row + .form-row::before { content: ""; position: absolute; top: 0; left: 12px; right: 0; height: 1px; background: var(--hairline); }
+      .form-label { min-width: 0; flex: 1; font-size: 14px; }
+      .form-value { color: var(--muted); font-size: 13px; }
+      .form-input, .form-select { min-width: 0; border: 0; outline: 0; color: var(--text); background: transparent; font: inherit; font-size: 14px; text-align: right; }
+      .form-input { width: 100%; text-align: left; }
+      .connection-field { max-width: 64%; text-align: right; color: var(--cyan); }
+      .connection-result[hidden] { display: none; }
+      .connection-result .form-label { color: var(--muted); font-size: 12px; }
+      .connection-result.good .form-label { color: var(--green); }
+      .connection-result.failed .form-label { color: #ff6961; }
+      .form-select { max-width: 58%; color: var(--cyan); }
+      .form-select option { color: initial; }
+      .form-footer { margin: 7px 12px 0; color: var(--muted); font-size: 10px; line-height: 1.4; }
+      .form-link { color: inherit; text-decoration: none; }
+      .form-link .row-chevron { margin-left: -4px; }
+      .status-good { color: var(--green); font-weight: 650; }
+      .status-warning { color: var(--orange); font-weight: 650; }
+      .event-list {
+        height: calc(100vh - 145px);
+        min-height: 560px;
+        margin: 0 -18px -40px;
+        overflow-y: auto;
+        background: rgba(17, 18, 24, .76);
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+      .event-list-spacer { position: relative; width: 100%; }
+      .sync-event-row {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 68px;
+        padding: 10px 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .event-copy { min-width: 0; flex: 1; }
+      .event-trigger { display: block; font-size: 14px; font-weight: 650; }
+      .event-summary { display: block; margin-top: 4px; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+      .event-time { flex: 0 0 auto; color: var(--muted); font-size: 11px; text-align: right; }
+      .native-date-input { border: 0; color: var(--cyan); background: transparent; font: inherit; font-size: 13px; }
+      .form-action { width: 100%; min-height: 52px; border: 0; padding: 0 12px; color: var(--cyan); background: transparent; text-align: center; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+      .form-action:disabled { color: var(--faint); cursor: default; }
+      .form-action.destructive { color: #ff6961; }
+      #diagnostics-export-progress:not([hidden]) { display: inline-flex; align-items: center; justify-content: center; }
+      .progress-ring { width: 18px; height: 18px; flex: 0 0 18px; border: 2px solid rgba(255,255,255,.22); border-top-color: var(--cyan); border-radius: 50%; animation: spin 900ms linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .historical-section[hidden], .alert-backdrop[hidden] { display: none; }
+      .alert-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(0,0,0,.46); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+      .native-alert { width: min(100%, 285px); overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 16px; background: rgba(46,46,49,.92); box-shadow: 0 20px 60px rgba(0,0,0,.45); text-align: center; }
+      .native-alert-copy { padding: 19px 18px 16px; }
+      .native-alert h2 { font-size: 16px; }
+      .native-alert p { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+      .native-alert-actions { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hairline); }
+      .native-alert-actions button { min-height: 46px; border: 0; color: var(--cyan); background: transparent; font: inherit; font-size: 13px; cursor: pointer; }
+      .native-alert-actions button + button { border-left: 1px solid var(--hairline); font-weight: 700; }
+      .confirmation-backdrop[hidden] { display: none; }
+      .confirmation-backdrop { position: fixed; z-index: 19; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding: 12px 12px max(12px, env(safe-area-inset-bottom)); background: rgba(0,0,0,.42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+      .confirmation-sheet { width: min(100%, 390px); display: grid; gap: 8px; }
+      .confirmation-group { overflow: hidden; border-radius: 14px; background: rgba(48,48,52,.96); text-align: center; }
+      .confirmation-copy { padding: 13px 18px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+      .confirmation-sheet button { width: 100%; min-height: 54px; border: 0; border-top: 1px solid var(--hairline); color: var(--cyan); background: transparent; font: inherit; font-size: 15px; cursor: pointer; }
+      .confirmation-sheet button.destructive { color: #ff6961; }
+      .confirmation-sheet .cancel-action { border: 0; border-radius: 14px; background: rgba(48,48,52,.96); font-weight: 700; }
+      .scope-mark { width: 24px; flex: 0 0 24px; color: var(--muted); text-align: center; font-size: 14px; }
+      .scope-mark.preserved { color: var(--green); }
+      .maintenance-state[hidden] { display: none; }
+      .validation-text { margin: 8px 12px 0; color: #ff6961; font-size: 11px; line-height: 1.4; }
+      .validation-text[hidden], .transformation-fields[hidden], .constant-row[hidden] { display: none; }
+
+      .advanced-disclosure { overflow: hidden; border-radius: 13px; background: rgba(31, 32, 39, .94); }
+      .advanced-disclosure summary { min-height: 52px; padding: 9px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; font-size: 14px; }
+      .advanced-disclosure summary::-webkit-details-marker { display: none; }
+      .advanced-disclosure summary::after { content: "›"; color: var(--muted); font-size: 21px; transition: transform 160ms ease; }
+      .advanced-disclosure[open] summary::after { transform: rotate(90deg); }
+      .transformation-fields { border-top: 1px solid var(--hairline); }
+      .permission-button { width: 100%; min-height: 52px; border: 0; padding: 0 12px; color: var(--cyan); background: transparent; text-align: left; font: inherit; font-size: 14px; font-weight: 620; cursor: pointer; }
+
+      .authorized-section[hidden] { display: none; }
+      .medication-check { width: 24px; color: var(--green); text-align: center; font-size: 15px; font-weight: 800; }
+      .medication-empty { min-height: 52px; padding: 16px 12px; color: var(--muted); font-size: 13px; }
+
+      .prototype-note {
+        margin: 22px 4px 0;
+        text-align: center;
+        color: var(--faint);
+        font-size: 10px;
+        line-height: 1.45;
+      }
+
+      .settings-card:active, .settings-row:active, .back-link:active { opacity: .72; }
+
+      @media (max-width: 520px) {
+        .stage { display: block; padding: 0; }
+        .device { width: 100%; min-height: 100vh; border: 0; border-radius: 0; box-shadow: none; }
+        .screen { min-height: calc(100vh - 48px); padding-bottom: max(38px, env(safe-area-inset-bottom)); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="stage" id="app">
+      <div class="device">
+        <div class="status-bar" aria-hidden="true">
+          <span>9:41</span>
+          <span class="system-icons"><span class="signal">▮▮▮▮</span><span>⌁</span><span class="battery"></span></span>
+        </div>
+
+        <div class="screen">
+          <section class="page" data-page="root" aria-label="Settings">
+            <header class="navigation">
+              <a class="back-link" href="../Dashboard/DashboardHomeRedesign.prototype.html?variant=C">‹ Health Sync</a>
+              <h1>Settings</h1>
+            </header>
+            <p class="root-intro">Configure each data path independently. Sync from Home always runs both directions.</p>
+
+            <div class="settings-stack">
+              <a class="settings-card glass" id="settings-connection" data-go="connection" href="?page=connection" aria-label="Home Assistant Connection, Connected">
+                <span class="icon-bubble" style="--accent: var(--green)">⌂</span>
+                <span class="card-copy"><span class="card-title">Home Assistant Connection</span><span class="card-summary" style="--accent: var(--green)">Connected</span><span class="card-description">Server, credentials, and connection tests</span></span>
+                <span class="chevron">›</span>
+              </a>
+              <a class="settings-card glass" id="settings-export" data-go="export" href="?page=export" aria-label="Export to Home Assistant, 12 metrics, Medications on">
+                <span class="icon-bubble" style="--accent: var(--cyan)">↗</span>
+                <span class="card-copy"><span class="card-title">Export to Home Assistant</span><span class="card-summary">12 metrics · Medications on</span><span class="card-description">Health data, background sync, and history</span></span>
+                <span class="chevron">›</span>
+              </a>
+              <a class="settings-card glass" id="settings-import" data-go="import" href="?page=import" aria-label="Import to Apple Health, 3 pairings">
+                <span class="icon-bubble" style="--accent: var(--purple)">↙</span>
+                <span class="card-copy"><span class="card-title">Import to Apple Health</span><span class="card-summary" style="--accent: var(--purple)">3 pairings</span><span class="card-description">Home Assistant entities and write permissions</span></span>
+                <span class="chevron">›</span>
+              </a>
+              <a class="settings-card glass" id="settings-privacy" data-go="privacy" href="?page=privacy" aria-label="App and Privacy, Diagnostics and local data">
+                <span class="icon-bubble" style="--accent: var(--orange)">◇</span>
+                <span class="card-copy"><span class="card-title">App &amp; Privacy</span><span class="card-summary" style="--accent: var(--orange)">Diagnostics and local data</span><span class="card-description">Privacy, troubleshooting, and data management</span></span>
+                <span class="chevron">›</span>
+              </a>
+            </div>
+            <p class="prototype-note">PROTOTYPE · Sample configuration state</p>
+          </section>
+
+          <section class="page" data-page="connection" aria-label="Home Assistant Connection">
+            <header class="navigation"><a class="back-link" data-go="root" href="?page=root">‹ Settings</a><h1>Home Assistant Connection</h1></header>
+            <p class="section-label">Connection</p>
+            <div class="settings-group glass">
+              <div class="settings-row"><span class="row-icon" style="--accent: var(--green)">✓</span><span class="row-label">Status</span><span class="row-value good">Connected</span></div>
+              <div class="settings-row"><span class="row-icon">⌂</span><span class="row-label">Server</span><span class="row-value">homeassistant.local</span></div>
+            </div>
+            <p class="section-label">Configuration</p>
+            <div class="settings-group glass">
+              <a class="settings-row" data-go="connection-editor" href="?page=connection-editor"><span class="row-icon">✎</span><span class="row-label">Edit Connection</span><span class="row-chevron">›</span></a>
+            </div>
+            <p class="footer-copy">Credentials are stored separately in the iOS Keychain.</p>
+            <p class="prototype-note">PROTOTYPE · Controls are visual only</p>
+          </section>
+
+          <section class="page" data-page="connection-editor" aria-label="Edit Connection">
+            <header class="navigation"><a class="back-link" data-go="connection" href="?page=connection">‹ Connection</a><div class="title-row"><h1>Edit Connection</h1><button class="toolbar-save" id="save-connection-editor" type="button">Save</button></div></header>
+
+            <div class="form-section"><p class="section-label">Home Assistant</p><div class="form-group">
+              <label class="form-row"><span class="form-label">Base URL</span><input class="form-input connection-field" id="connection-base-url" type="url" value="https://homeassistant.local:8123" autocomplete="url" autocapitalize="none" aria-label="Base URL" /></label>
+              <label class="form-row"><span class="form-label">Health Bridge User ID</span><input class="form-input connection-field" id="connection-user-id" type="text" value="health_bridge_user" autocomplete="off" autocapitalize="none" aria-label="Health Bridge User ID" /></label>
+            </div><p class="validation-text" id="connection-validation" hidden>Enter both the Home Assistant Base URL and Health Bridge User ID.</p></div>
+
+            <div class="form-section"><p class="section-label">Health Bridge Webhook</p><div class="form-group">
+              <label class="form-row"><span class="form-label">Webhook Secret</span><input class="form-input connection-field" id="connection-webhook-secret" type="password" placeholder="Enter to replace" autocomplete="new-password" aria-label="Webhook Secret" /></label>
+              <button class="permission-button" id="connection-test-webhook" type="button" disabled>Test Health Bridge Webhook</button>
+              <div class="form-row connection-result" id="connection-webhook-result" hidden><span class="form-label"></span></div>
+              <div class="form-row connection-result good" id="connection-webhook-version" hidden><span class="form-label">Integration Version 1</span></div>
+            </div><p class="form-footer">Testing replaces the stored webhook secret in Keychain before checking it. The API token is never changed.</p></div>
+
+            <div class="form-section"><p class="section-label">Home Assistant API</p><div class="form-group">
+              <label class="form-row"><span class="form-label">Long-Lived Access Token</span><input class="form-input connection-field" id="connection-access-token" type="password" placeholder="Enter to replace" autocomplete="new-password" aria-label="Long-Lived Access Token" /></label>
+              <button class="permission-button" id="connection-test-api" type="button" disabled>Test Authenticated API</button>
+              <div class="form-row connection-result" id="connection-api-result" hidden><span class="form-label"></span></div>
+            </div><p class="form-footer">Testing replaces the stored API token in Keychain before checking it. The webhook secret is never changed.</p></div>
+
+            <div class="form-section"><p class="section-label">Security</p><div class="form-group"><label class="form-row"><span class="form-label">Allow Confirmed Local HTTP</span><span class="native-toggle"><input id="connection-local-http" type="checkbox" /><span class="toggle-track"></span></span></label></div><p class="form-footer">Only use HTTP for Home Assistant on your trusted local network. Remote addresses must use HTTPS.</p></div>
+
+            <p class="form-footer">Leave either credential blank to keep its current Keychain value. The two credentials are never interchangeable.</p>
+            <div class="prototype-state-switcher" aria-label="Prototype connection editor state"><a data-connection-state="existing" href="?page=connection-editor">Existing</a><a data-connection-state="testing" href="?page=connection-editor&amp;state=testing">Testing</a><a data-connection-state="success" href="?page=connection-editor&amp;state=success">Success</a><a data-connection-state="failed" href="?page=connection-editor&amp;state=failed">Failed</a><a data-connection-state="validation" href="?page=connection-editor&amp;state=validation">Invalid</a></div>
+            <p class="prototype-note">PROTOTYPE · Credential fields are cleared when leaving</p>
+          </section>
+
+          <section class="page" data-page="export" aria-label="Export to Home Assistant">
+            <header class="navigation"><a class="back-link" data-go="root" href="?page=root">‹ Settings</a><h1>Export to Home Assistant</h1></header>
+            <p class="section-label">Apple Health data</p>
+            <div class="settings-group glass">
+              <a class="settings-row" data-go="metrics" href="?page=metrics"><span class="row-icon">◆</span><span class="row-label">Health Metrics</span><span class="row-value">12 selected</span><span class="row-chevron">›</span></a>
+              <a class="settings-row" data-go="medications" href="?page=medications"><span class="row-icon" style="--accent: var(--pink)">●</span><span class="row-label">Medications</span><span class="row-value">On</span><span class="row-chevron">›</span></a>
+              <a class="settings-row" data-go="background" href="?page=background"><span class="row-icon" style="--accent: var(--green)">↻</span><span class="row-label">Background Sync</span><span class="row-value">On</span><span class="row-chevron">›</span></a>
+              <a class="settings-row" data-go="historical" href="?page=historical"><span class="row-icon" style="--accent: var(--orange)">◷</span><span class="row-label">Historical Import</span><span class="row-value">Available</span><span class="row-chevron">›</span></a>
+            </div>
+            <p class="section-label">Health permission</p>
+            <div class="settings-group glass"><button class="settings-row" type="button"><span class="row-icon" style="--accent: var(--purple)">✓</span><span class="row-label">Review Read Permissions</span></button></div>
+            <p class="direction-note">Apple Health data selected here is sent during the bidirectional sync.</p>
+            <p class="prototype-note">PROTOTYPE · Controls are visual only</p>
+          </section>
+
+          <section class="page" data-page="metrics" aria-label="Health Metrics">
+            <header class="navigation"><a class="back-link" data-go="export" href="?page=export">‹ Export</a><h1>Health Metrics</h1></header>
+            <div class="metric-toolbar">
+              <label class="search-field"><span aria-hidden="true">⌕</span><input id="metric-search" type="search" placeholder="Search metrics" autocomplete="off" aria-label="Search metrics" /></label>
+              <div class="selection-summary"><span class="selection-count" id="selection-count">12 selected</span><span class="bulk-actions"><button class="text-action" id="select-all" type="button">Select All</button><button class="text-action" id="clear-all" type="button">Clear</button></span></div>
+            </div>
+
+            <div class="metric-section" data-category="activity"><p class="section-label">Activity</p><div class="metric-list">
+              <label class="metric-row" data-name="Steps"><span class="metric-symbol" style="--accent: var(--blue)">◆</span><span class="metric-name">Steps</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Walking and Running Distance"><span class="metric-symbol" style="--accent: var(--green)">↗</span><span class="metric-name">Walking + Running Distance</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Active Calories"><span class="metric-symbol" style="--accent: var(--orange)">◒</span><span class="metric-name">Active Calories</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Exercise Time"><span class="metric-symbol" style="--accent: var(--pink)">●</span><span class="metric-name">Exercise Time</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Walking Speed"><span class="metric-symbol" style="--accent: var(--cyan)">≈</span><span class="metric-name">Walking Speed</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+
+            <div class="metric-section" data-category="body"><p class="section-label">Body Measurements</p><div class="metric-list">
+              <label class="metric-row" data-name="Body Weight"><span class="metric-symbol" style="--accent: var(--orange)">●</span><span class="metric-name">Body Weight</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Height"><span class="metric-symbol" style="--accent: var(--blue)">↕</span><span class="metric-name">Height</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Body Fat Percentage"><span class="metric-symbol" style="--accent: var(--purple)">%</span><span class="metric-name">Body Fat Percentage</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+
+            <div class="metric-section" data-category="vitals"><p class="section-label">Vitals</p><div class="metric-list">
+              <label class="metric-row" data-name="Heart Rate"><span class="metric-symbol" style="--accent: var(--pink)">♥</span><span class="metric-name">Heart Rate</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Resting Heart Rate"><span class="metric-symbol" style="--accent: var(--pink)">♥</span><span class="metric-name">Resting Heart Rate</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Oxygen Saturation"><span class="metric-symbol" style="--accent: var(--cyan)">O₂</span><span class="metric-name">Oxygen Saturation</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Respiratory Rate"><span class="metric-symbol" style="--accent: var(--blue)">≈</span><span class="metric-name">Respiratory Rate</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+
+            <div class="metric-section" data-category="sleep"><p class="section-label">Sleep</p><div class="metric-list">
+              <label class="metric-row" data-name="Sleep Duration"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">Sleep Duration</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Deep Sleep"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">Deep Sleep</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="REM Sleep"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">REM Sleep</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+            </div></div>
+
+            <div class="metric-section" data-category="other"><p class="section-label">Other</p><div class="metric-list">
+              <label class="metric-row" data-name="Dietary Water"><span class="metric-symbol" style="--accent: var(--cyan)">●</span><span class="metric-name">Dietary Water</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Mindful Minutes"><span class="metric-symbol" style="--accent: var(--green)">◇</span><span class="metric-name">Mindful Minutes</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+              <label class="metric-row" data-name="Dietary Energy"><span class="metric-symbol" style="--accent: var(--orange)">◒</span><span class="metric-name">Dietary Energy</span><span class="native-toggle"><input type="checkbox" /><span class="toggle-track"></span></span></label>
+            </div></div>
+
+            <div class="save-bar"><button class="save-button" id="save-metrics" type="button">Save 12 Metrics</button></div>
+          </section>
+
+          <section class="page" data-page="medications" aria-label="Medications">
+            <header class="navigation"><a class="back-link" data-go="export" href="?page=export">‹ Export</a><h1>Medications</h1></header>
+
+            <div class="form-section"><p class="section-label">Apple Health access</p><div class="form-group"><button class="permission-button" id="choose-medications" type="button">Choose Medications in Apple Health</button></div><p class="form-footer">Apple shows a per-medication authorization sheet. Only medications you approve are read. HA Health Sync cannot create medications or dose events.</p></div>
+
+            <div class="form-section authorized-section" id="authorized-medications" hidden><p class="section-label">Authorized medications</p><div class="form-group" id="authorized-medication-list"></div></div>
+
+            <div class="form-section"><p class="section-label">Synchronization</p><div class="form-group"><label class="form-row"><span class="form-label">Sync Authorized Medications</span><span class="native-toggle"><input id="medication-sync-toggle" type="checkbox" checked /><span class="toggle-track"></span></span></label></div><p class="form-footer">Medication sync is independent from numeric metric selection and Home Assistant → Apple Health pairings.</p></div>
+
+            <div class="prototype-state-switcher" aria-label="Prototype medication state"><a data-medication-state="before" href="?page=medications">Before access</a><a data-medication-state="authorized" href="?page=medications&amp;state=authorized">Authorized</a><a data-medication-state="empty" href="?page=medications&amp;state=empty">None</a></div>
+            <p class="prototype-note">PROTOTYPE · Medication names exist only after authorization</p>
+          </section>
+
+          <section class="page" data-page="background" aria-label="Background Sync">
+            <header class="navigation"><a class="back-link" data-go="export" href="?page=export">‹ Export</a><h1>Background Sync</h1></header>
+
+            <div class="form-section"><p class="section-label">Automatic sync</p><div class="form-group"><label class="form-row"><span class="form-label">Background Sync</span><span class="native-toggle"><input id="background-sync-toggle" type="checkbox" checked /><span class="toggle-track"></span></span></label></div><p class="form-footer">Best effort; timing is controlled by iOS.</p></div>
+
+            <div class="form-section"><p class="section-label">Status</p><div class="form-group">
+              <div class="form-row"><span class="form-label">Last attempt</span><span class="form-value" id="background-last-attempt">Today, 9:39</span></div>
+              <div class="form-row"><span class="form-label">Last success</span><span class="form-value" id="background-last-success">Today, 9:39</span></div>
+              <div class="form-row"><span class="form-label">Last failure</span><span class="form-value" id="background-last-failure">None</span></div>
+              <a class="form-row form-link" data-go="recent-events" href="?page=recent-events"><span class="form-label">Recent Sync Events</span><span class="form-value" id="recent-events-count">100 Events</span><span class="row-chevron">›</span></a>
+            </div></div>
+
+            <div class="form-section"><p class="section-label">Delivery</p><div class="form-group"><a class="form-row form-link" data-go="background-registrations" href="?page=background-registrations"><span class="form-label">Metric Registrations</span><span class="form-value status-good" id="background-registration-summary">12 of 12 Registered</span><span class="row-chevron">›</span></a></div><p class="form-footer">HealthKit observer notifications are the primary change signal. Background App Refresh provides a secondary opportunity. A force-quit app may not be relaunched by iOS.</p></div>
+
+            <div class="prototype-state-switcher" aria-label="Prototype background sync state"><a data-background-state="healthy" href="?page=background">Healthy</a><a data-background-state="disabled" href="?page=background&amp;state=disabled">Disabled</a><a data-background-state="attention" href="?page=background&amp;state=attention">Attention</a></div>
+            <p class="prototype-note">PROTOTYPE · Sample background delivery state</p>
+          </section>
+
+          <section class="page" data-page="background-registrations" aria-label="Metric Registrations">
+            <header class="navigation"><a class="back-link" data-go="background" href="?page=background">‹ Background Sync</a><h1>Metric Registrations</h1></header>
+            <div class="form-section"><p class="section-label">12 selected metrics</p><div class="form-group" id="background-registration-list">
+              <div class="form-row registration-row" data-metric="Steps"><span class="form-label">Steps</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Walking + Running Distance"><span class="form-label">Walking + Running Distance</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Active Calories"><span class="form-label">Active Calories</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Exercise Time"><span class="form-label">Exercise Time</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Body Weight"><span class="form-label">Body Weight</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Height"><span class="form-label">Height</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Heart Rate"><span class="form-label">Heart Rate</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Resting Heart Rate"><span class="form-label">Resting Heart Rate</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Oxygen Saturation"><span class="form-label">Oxygen Saturation</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Sleep Duration"><span class="form-label">Sleep Duration</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="Deep Sleep"><span class="form-label">Deep Sleep</span><span class="form-value registration-status">Registered</span></div>
+              <div class="form-row registration-row" data-metric="REM Sleep"><span class="form-label">REM Sleep</span><span class="form-value registration-status">Registered</span></div>
+            </div><p class="form-footer">Registration status is reported by HealthKit for each selected metric.</p></div>
+            <p class="prototype-note">PROTOTYPE · Read-only delivery diagnostics</p>
+          </section>
+
+          <section class="page" data-page="recent-events" aria-label="Recent Sync Events">
+            <header class="navigation"><a class="back-link" data-go="background" href="?page=background">‹ Background Sync</a><h1>Recent Sync Events</h1></header>
+            <div class="event-list" id="recent-sync-event-list" role="list" aria-label="100 recent sync events"><div class="event-list-spacer" id="recent-sync-event-spacer"></div></div>
+          </section>
+
+          <section class="page" data-page="historical" aria-label="Historical Import">
+            <header class="navigation"><a class="back-link" data-go="export" href="?page=export">‹ Export</a><h1>Historical Import</h1></header>
+
+            <div class="form-section"><p class="section-label">Experimental</p><div class="form-group"><label class="form-row"><span class="form-label">Historical Import</span><span class="native-toggle"><input id="historical-import-toggle" type="checkbox" /><span class="toggle-track"></span></span></label></div><p class="form-footer">Supports Home Assistant SQLite recorder schema 53, writes history-only statistics, and is limited to the latest 14 days. Incompatibility does not affect live synchronization.</p></div>
+
+            <div class="form-section"><p class="section-label">Compatibility</p><div class="form-group"><div class="form-row"><span class="form-label">Health Bridge</span><span class="form-value status-good" id="historical-capability">Available · Protocol 1</span></div></div></div>
+
+            <div class="form-section"><p class="section-label">Import window</p><div class="form-group"><label class="form-row"><span class="form-label">Start Date</span><input class="native-date-input" id="historical-start-date" type="date" min="2026-08-14" max="2026-08-28" value="2026-08-21" /></label></div><p class="form-footer">The integration enforces the 14-day limit, including a small clock-skew allowance.</p></div>
+
+            <div class="form-section"><p class="section-label">Metrics</p><div class="form-group"><a class="form-row form-link" data-go="historical-metrics" href="?page=historical-metrics"><span class="form-label">Eligible Metrics</span><span class="form-value" id="historical-metric-summary">12 Selected</span><span class="row-chevron">›</span></a></div><p class="form-footer">Workouts, timestamps, and medication sensors are not eligible.</p></div>
+
+            <div class="form-section historical-section" id="historical-ready-section"><div class="form-group"><button class="form-action" id="historical-import-start" type="button" disabled>Import Confirmed History</button></div></div>
+            <div class="form-section historical-section" id="historical-running-section" hidden><div class="form-group"><div class="form-row"><span class="progress-ring" aria-hidden="true"></span><span class="form-label">Importing without retaining raw values…</span></div><button class="form-action destructive" id="historical-import-cancel" type="button">Cancel Import</button></div></div>
+
+            <div class="form-section historical-section" id="historical-report-section" hidden><p class="section-label">Last import</p><div class="form-group">
+              <div class="form-row"><span class="form-label">Attempted Metrics</span><span class="form-value">12</span></div>
+              <div class="form-row"><span class="form-label">Committed Metrics</span><span class="form-value">9</span></div>
+              <div class="form-row"><span class="form-label">Skipped · No Eligible History</span><span class="form-value">3</span></div>
+              <div class="form-row"><span class="form-label">Committed Points</span><span class="form-value">1,284</span></div>
+              <div class="form-row"><span class="form-label">Failures</span><span class="form-value">0</span></div>
+            </div><p class="form-footer">Home Assistant confirmed that 1,284 history points were committed.</p></div>
+
+            <div class="prototype-state-switcher" aria-label="Prototype historical import state"><a data-historical-state="setup" href="?page=historical">Setup</a><a data-historical-state="running" href="?page=historical&amp;state=running">Running</a><a data-historical-state="completed" href="?page=historical&amp;state=completed">Completed</a><a data-historical-state="incompatible" href="?page=historical&amp;state=incompatible">Incompatible</a></div>
+            <p class="prototype-note">PROTOTYPE · No health values are retained</p>
+          </section>
+
+          <section class="page" data-page="historical-metrics" aria-label="Historical Metrics">
+            <header class="navigation"><a class="back-link" data-go="historical" href="?page=historical">‹ Historical Import</a><h1>Eligible Metrics</h1></header>
+            <div class="selection-summary"><span class="selection-count" id="historical-selection-count">12 selected</span><span class="bulk-actions"><button class="text-action" id="historical-select-all" type="button">Select All</button><button class="text-action" id="historical-clear-all" type="button">Clear</button></span></div>
+            <div class="metric-section"><p class="section-label">Activity</p><div class="metric-list">
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--blue)">◆</span><span class="metric-name">Steps</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--green)">↗</span><span class="metric-name">Walking + Running Distance</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--orange)">◒</span><span class="metric-name">Active Calories</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--pink)">●</span><span class="metric-name">Exercise Time</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <div class="metric-section"><p class="section-label">Body Measurements</p><div class="metric-list">
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--orange)">●</span><span class="metric-name">Body Weight</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--blue)">↕</span><span class="metric-name">Height</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <div class="metric-section"><p class="section-label">Vitals</p><div class="metric-list">
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--pink)">♥</span><span class="metric-name">Heart Rate</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--pink)">♥</span><span class="metric-name">Resting Heart Rate</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--cyan)">O₂</span><span class="metric-name">Oxygen Saturation</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <div class="metric-section"><p class="section-label">Sleep</p><div class="metric-list">
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">Sleep Duration</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">Deep Sleep</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+              <label class="metric-row historical-metric-row"><span class="metric-symbol" style="--accent: var(--purple)">☾</span><span class="metric-name">REM Sleep</span><span class="native-toggle"><input type="checkbox" checked /><span class="toggle-track"></span></span></label>
+            </div></div>
+            <p class="prototype-note">PROTOTYPE · Selection is not persisted</p>
+          </section>
+
+          <section class="page" data-page="import" aria-label="Import to Apple Health">
+            <header class="navigation"><a class="back-link" data-go="root" href="?page=root">‹ Settings</a><h1>Import to Apple Health</h1></header>
+            <p class="section-label">Home Assistant data</p>
+            <div class="settings-group glass">
+              <a class="settings-row" data-go="pairings" href="?page=pairings"><span class="row-icon" style="--accent: var(--purple)">↙</span><span class="row-label">Entity Pairings</span><span class="row-value">3 configured</span><span class="row-chevron">›</span></a>
+            </div>
+            <p class="section-label">Health permission</p>
+            <div class="settings-group glass"><button class="settings-row" type="button"><span class="row-icon" style="--accent: var(--green)">✓</span><span class="row-label">Review Write Permissions</span></button></div>
+            <aside class="callout glass"><span class="icon-bubble" style="--accent: var(--green)">◇</span><div><strong>Feedback-loop protection</strong><p>Imported samples are tagged so they are not sent back to Home Assistant.</p></div></aside>
+            <p class="prototype-note">PROTOTYPE · Controls are visual only</p>
+          </section>
+
+          <section class="page" data-page="pairings" aria-label="Entity Pairings">
+            <header class="navigation"><a class="back-link" data-go="import" href="?page=import">‹ Import</a><div class="title-row"><h1>Entity Pairings</h1><a class="toolbar-button" href="?page=pairing-editor&amp;mode=new" aria-label="Add Pairing">+</a></div></header>
+            <p class="section-label">Pairings</p>
+            <div class="settings-group glass pairing-list" id="pairing-list">
+              <a class="settings-row pairing-row" href="?page=pairing-editor&amp;mode=edit"><span class="row-icon" style="--accent: var(--orange)">●</span><span class="pairing-copy"><span class="pairing-title">Body Weight</span><span class="pairing-entity">sensor.smart_scale_weight</span><span class="pairing-status enabled">Enabled</span></span><span class="row-chevron">›</span></a>
+              <a class="settings-row pairing-row" href="?page=pairing-editor&amp;mode=edit"><span class="row-icon" style="--accent: var(--pink)">♥</span><span class="pairing-copy"><span class="pairing-title">Blood Pressure Systolic</span><span class="pairing-entity">sensor.blood_pressure_systolic</span><span class="pairing-status enabled">Enabled</span></span><span class="row-chevron">›</span></a>
+              <a class="settings-row pairing-row" href="?page=pairing-editor&amp;mode=edit"><span class="row-icon" style="--accent: var(--purple)">◆</span><span class="pairing-copy"><span class="pairing-title">Blood Glucose</span><span class="pairing-entity">sensor.glucose</span><span class="pairing-status">Paused</span></span><span class="row-chevron">›</span></a>
+            </div>
+            <div class="settings-group glass empty-state" id="pairing-empty" hidden>
+              <div class="empty-symbol">↔</div><h2>No Pairings</h2><p>Add a numeric Home Assistant entity to import it into Apple Health.</p><button class="empty-action" type="button">Add Pairing</button>
+            </div>
+            <p class="section-label">Health permission</p>
+            <div class="settings-group glass"><button class="settings-row" type="button"><span class="row-icon" style="--accent: var(--green)">✓</span><span class="row-label">Review Write Permissions</span></button></div>
+            <p class="footer-copy">Only destinations used by your pairings are requested.</p>
+            <div class="prototype-state-switcher" aria-label="Prototype pairing state"><a data-pairing-state="populated" href="?page=pairings">3 pairings</a><a data-pairing-state="empty" href="?page=pairings&amp;state=empty">Empty state</a></div>
+            <p class="prototype-note">PROTOTYPE · Swipe to delete in native implementation</p>
+          </section>
+
+          <section class="page" data-page="pairing-editor" aria-label="Pairing Editor">
+            <header class="navigation"><a class="back-link" data-go="pairings" href="?page=pairings">‹ Pairings</a><div class="title-row"><h1 id="pairing-editor-title">New Pairing</h1><button class="toolbar-save" id="save-pairing" type="button">Save</button></div></header>
+
+            <div class="form-section"><p class="section-label">Home Assistant</p><div class="form-group"><label class="form-row"><input class="form-input" id="pairing-entity" type="text" placeholder="sensor.body_mass" autocomplete="off" autocapitalize="none" aria-label="Entity ID" /></label></div><p class="form-footer">Use a numeric entity such as sensor.body_mass.</p><p class="validation-text" id="entity-validation" hidden>Enter a lowercase Home Assistant entity ID, such as sensor.body_mass.</p></div>
+
+            <div class="form-section"><p class="section-label">Apple Health</p><div class="form-group">
+              <label class="form-row"><span class="form-label">Health destination</span><select class="form-select" id="pairing-destination"><option value="bodyMass">Body Weight</option><option value="bloodGlucose">Blood Glucose</option><option value="heartRate">Heart Rate</option><option value="dietaryWater">Dietary Water</option></select></label>
+              <label class="form-row"><span class="form-label">Source unit</span><select class="form-select" id="pairing-source-unit"><option value="kg">kg</option><option value="lb">lb</option></select></label>
+              <div class="form-row"><span class="form-label">HealthKit unit</span><span class="form-value" id="pairing-healthkit-unit">kg</span></div>
+              <label class="form-row"><span class="form-label">Enabled</span><span class="native-toggle"><input id="pairing-enabled" type="checkbox" checked /><span class="toggle-track"></span></span></label>
+            </div><p class="form-footer">The destination unit is fixed to HealthKit’s native unit.</p></div>
+
+            <div class="form-section"><p class="section-label">Optional</p><details class="advanced-disclosure" id="advanced-pairing"><summary>Advanced transformation</summary><div class="transformation-fields">
+              <label class="form-row"><span class="form-label">Transformation</span><select class="form-select" id="pairing-transformation"><option value="identity">None</option><option value="multiply">Multiply</option><option value="add">Add</option><option value="affine">Multiply and add</option></select></label>
+              <label class="form-row constant-row" id="primary-constant-row" hidden><span class="form-label" id="primary-constant-label">Multiplier</span><input class="form-input" id="primary-constant" inputmode="decimal" value="1" /></label>
+              <label class="form-row constant-row" id="offset-constant-row" hidden><span class="form-label">Offset</span><input class="form-input" id="offset-constant" inputmode="decimal" value="0" /></label>
+            </div></details><p class="form-footer">Transforms are applied before unit conversion and plausible-bounds validation.</p></div>
+
+            <div class="form-section"><p class="section-label">Permission</p><div class="form-group"><button class="permission-button" type="button">Request Health Write Access</button></div><p class="form-footer">Saving a pairing does not automatically request or broaden Health permissions.</p></div>
+
+            <div class="prototype-state-switcher" aria-label="Prototype editor mode"><a data-editor-mode="new" href="?page=pairing-editor&amp;mode=new">New</a><a data-editor-mode="edit" href="?page=pairing-editor&amp;mode=edit">Edit</a></div>
+            <p class="prototype-note">PROTOTYPE · Form state is not saved</p>
+          </section>
+
+          <section class="page" data-page="diagnostics" aria-label="Diagnostics">
+            <header class="navigation"><a class="back-link" data-go="privacy" href="?page=privacy">‹ App &amp; Privacy</a><h1>Diagnostics</h1></header>
+
+            <div class="form-section"><p class="section-label">Included</p><div class="form-group">
+              <div class="form-row"><span class="form-label">App, OS &amp; Protocol Versions</span><span class="form-value">Included</span></div>
+              <div class="form-row"><span class="form-label">Feature States</span><span class="form-value">Included</span></div>
+              <div class="form-row"><span class="form-label">Counts &amp; Timestamps</span><span class="form-value">Included</span></div>
+              <div class="form-row"><span class="form-label">Error Categories</span><span class="form-value">Included</span></div>
+            </div></div>
+
+            <div class="form-section"><p class="section-label">Never included</p><div class="form-group">
+              <div class="form-row"><span class="form-label">Server URLs &amp; Entity IDs</span><span class="medication-check">✓</span></div>
+              <div class="form-row"><span class="form-label">Credentials</span><span class="medication-check">✓</span></div>
+              <div class="form-row"><span class="form-label">Health Values</span><span class="medication-check">✓</span></div>
+            </div><p class="form-footer">The generated JSON document receives a final redaction pass before the system export sheet opens.</p></div>
+
+            <div class="form-section"><p class="section-label">Export</p><div class="form-group"><button class="form-action" id="diagnostics-export" type="button"><span id="diagnostics-export-label">↥&nbsp; Export Redacted Diagnostics</span><span id="diagnostics-export-progress" hidden><span class="progress-ring" aria-hidden="true"></span>&nbsp; Preparing…</span></button></div></div>
+
+            <div class="form-section historical-section" id="diagnostics-issue" hidden><p class="section-label">Current issue</p><div class="form-group"><div class="form-row"><span class="form-label">Diagnostics could not be prepared.</span></div></div></div>
+
+            <div class="prototype-state-switcher" aria-label="Prototype diagnostics state"><a data-diagnostics-state="ready" href="?page=diagnostics">Ready</a><a data-diagnostics-state="preparing" href="?page=diagnostics&amp;state=preparing">Preparing</a><a data-diagnostics-state="failed" href="?page=diagnostics&amp;state=failed">Failed</a></div>
+            <p class="prototype-note">PROTOTYPE · Export opens the native iOS file sheet</p>
+          </section>
+
+          <section class="page" data-page="data-management" aria-label="Data Management">
+            <header class="navigation"><a class="back-link" data-go="privacy" href="?page=privacy">‹ App &amp; Privacy</a><h1>Data Management</h1></header>
+            <div class="form-section"><p class="section-label">Synchronization</p><div class="form-group"><a class="form-row form-link" data-go="reset-sync-review" href="?page=reset-sync-review"><span class="form-label">Reset Synchronization State</span><span class="row-chevron">›</span></a></div><p class="form-footer">Clears synchronization progress while preserving your configuration.</p></div>
+            <div class="form-section"><p class="section-label">This app</p><div class="form-group"><a class="form-row form-link" data-go="delete-all-review" href="?page=delete-all-review"><span class="form-label">Delete All Local App Data</span><span class="row-chevron">›</span></a></div><p class="form-footer">Removes this app’s local settings and credentials, then returns to onboarding.</p></div>
+            <p class="prototype-note">PROTOTYPE · Destructive actions require two confirmations</p>
+          </section>
+
+          <section class="page maintenance-review" data-page="reset-sync-review" aria-label="Reset Synchronization State">
+            <header class="navigation"><a class="back-link" data-go="data-management" href="?page=data-management">‹ Data Management</a><h1>Reset Sync State</h1></header>
+            <div class="form-section"><p class="section-label">Removed</p><div class="form-group">
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Apple Health Query Anchors</span></div>
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Import &amp; Historical Checkpoints</span></div>
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Medication Checkpoints</span></div>
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Recent Sync Status</span></div>
+            </div></div>
+            <div class="form-section"><p class="section-label">Preserved</p><div class="form-group">
+              <div class="form-row"><span class="scope-mark preserved">✓</span><span class="form-label">Connection Settings &amp; Keychain Credentials</span></div>
+              <div class="form-row"><span class="scope-mark preserved">✓</span><span class="form-label">Selected Metrics &amp; Pairings</span></div>
+            </div><p class="form-footer">The next synchronization may resend current data.</p></div>
+            <div class="form-section maintenance-state" data-maintenance-ready="reset-sync-review"><div class="form-group"><button class="form-action destructive" data-maintenance-action="reset" type="button">Reset Synchronization State</button></div></div>
+            <div class="form-section maintenance-state" data-maintenance-working="reset-sync-review" hidden><div class="form-group"><div class="form-row"><span class="progress-ring" aria-hidden="true"></span><span class="form-label">Updating protected local storage…</span></div></div></div>
+            <div class="form-section maintenance-state" data-maintenance-result="reset-sync-review" hidden><p class="section-label">Result</p><div class="form-group"><div class="form-row"><span class="form-label" data-maintenance-result-copy="reset-sync-review"></span></div></div></div>
+            <div class="prototype-state-switcher" aria-label="Prototype reset state"><a data-maintenance-state="ready" data-maintenance-page="reset-sync-review" href="?page=reset-sync-review">Ready</a><a data-maintenance-state="working" data-maintenance-page="reset-sync-review" href="?page=reset-sync-review&amp;state=working">Working</a><a data-maintenance-state="success" data-maintenance-page="reset-sync-review" href="?page=reset-sync-review&amp;state=success">Success</a><a data-maintenance-state="partial" data-maintenance-page="reset-sync-review" href="?page=reset-sync-review&amp;state=partial">Partial</a></div>
+            <p class="prototype-note">PROTOTYPE · Apple Health and Home Assistant data remain untouched</p>
+          </section>
+
+          <section class="page maintenance-review" data-page="delete-all-review" aria-label="Delete All Local App Data">
+            <header class="navigation"><a class="back-link" data-go="data-management" href="?page=data-management">‹ Data Management</a><h1>Delete Local Data</h1></header>
+            <div class="form-section"><p class="section-label">Deleted from this app</p><div class="form-group">
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Connection Settings &amp; Both Credentials</span></div>
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Metric Selections &amp; Pairings</span></div>
+              <div class="form-row"><span class="scope-mark">−</span><span class="form-label">Checkpoints &amp; Status History</span></div>
+            </div></div>
+            <div class="form-section"><p class="section-label">Not touched</p><div class="form-group">
+              <div class="form-row"><span class="scope-mark preserved">✓</span><span class="form-label">Apple Health Samples</span></div>
+              <div class="form-row"><span class="scope-mark preserved">✓</span><span class="form-label">Home Assistant Entities &amp; Recorder History</span></div>
+            </div><p class="form-footer">This cannot be undone. Successful deletion returns the app to onboarding.</p></div>
+            <div class="form-section maintenance-state" data-maintenance-ready="delete-all-review"><div class="form-group"><button class="form-action destructive" data-maintenance-action="delete" type="button">Delete All Local App Data</button></div></div>
+            <div class="form-section maintenance-state" data-maintenance-working="delete-all-review" hidden><div class="form-group"><div class="form-row"><span class="progress-ring" aria-hidden="true"></span><span class="form-label">Updating protected local storage…</span></div></div></div>
+            <div class="form-section maintenance-state" data-maintenance-result="delete-all-review" hidden><p class="section-label">Result</p><div class="form-group"><div class="form-row"><span class="form-label" data-maintenance-result-copy="delete-all-review"></span></div></div></div>
+            <div class="prototype-state-switcher" aria-label="Prototype deletion state"><a data-maintenance-state="ready" data-maintenance-page="delete-all-review" href="?page=delete-all-review">Ready</a><a data-maintenance-state="working" data-maintenance-page="delete-all-review" href="?page=delete-all-review&amp;state=working">Working</a><a data-maintenance-state="success" data-maintenance-page="delete-all-review" href="?page=delete-all-review&amp;state=success">Success</a><a data-maintenance-state="partial" data-maintenance-page="delete-all-review" href="?page=delete-all-review&amp;state=partial">Partial</a></div>
+            <p class="prototype-note">PROTOTYPE · Successful deletion returns to onboarding</p>
+          </section>
+
+          <section class="page" data-page="privacy" aria-label="App and Privacy">
+            <header class="navigation"><a class="back-link" data-go="root" href="?page=root">‹ Settings</a><h1>App &amp; Privacy</h1></header>
+            <p class="section-label">Support</p>
+            <div class="settings-group glass">
+              <a class="settings-row" data-go="diagnostics" href="?page=diagnostics"><span class="row-icon" style="--accent: var(--blue)">i</span><span class="row-label">Diagnostics</span><span class="row-chevron">›</span></a>
+              <a class="settings-row" data-go="data-management" href="?page=data-management"><span class="row-icon" style="--accent: var(--orange)">⌫</span><span class="row-label">Data Management</span><span class="row-chevron">›</span></a>
+            </div>
+            <aside class="callout glass"><span class="icon-bubble" style="--accent: var(--green)">◇</span><div><strong>Private by design</strong><p>Health data is processed on this iPhone and sent directly to your Home Assistant. The app has no analytics or external backend.</p></div></aside>
+            <p class="prototype-note">PROTOTYPE · Sample configuration state</p>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <div class="alert-backdrop" id="historical-enable-alert" hidden>
+      <div class="native-alert" role="alertdialog" aria-modal="true" aria-labelledby="historical-alert-title">
+        <div class="native-alert-copy"><h2 id="historical-alert-title">Enable Experimental Import?</h2><p>This uses Home Assistant recorder internals that may change. Live synchronization remains separate.</p></div>
+        <div class="native-alert-actions"><button id="historical-alert-cancel" type="button">Cancel</button><button id="historical-alert-enable" type="button">Enable</button></div>
+      </div>
+    </div>
+
+    <div class="confirmation-backdrop" id="maintenance-review-dialog" hidden>
+      <div class="confirmation-sheet" role="dialog" aria-modal="true" aria-labelledby="maintenance-review-copy">
+        <div class="confirmation-group"><p class="confirmation-copy" id="maintenance-review-copy"></p><button class="destructive" id="maintenance-review-action" type="button"></button></div>
+        <button class="cancel-action" id="maintenance-review-cancel" type="button">Cancel</button>
+      </div>
+    </div>
+
+    <div class="alert-backdrop" id="maintenance-final-alert" hidden>
+      <div class="native-alert" role="alertdialog" aria-modal="true" aria-labelledby="maintenance-alert-title">
+        <div class="native-alert-copy"><h2 id="maintenance-alert-title"></h2><p id="maintenance-alert-message"></p></div>
+        <div class="native-alert-actions"><button id="maintenance-alert-cancel" type="button">Cancel</button><button id="maintenance-alert-confirm" type="button"></button></div>
+      </div>
+    </div>
+
+    <div class="alert-backdrop" id="connection-http-alert" hidden>
+      <div class="native-alert" role="alertdialog" aria-modal="true" aria-labelledby="connection-http-alert-title">
+        <div class="native-alert-copy"><h2 id="connection-http-alert-title">Local HTTP Is Not Encrypted</h2><p>Only use HTTP for a Home Assistant address on your trusted local network. Remote addresses must use HTTPS.</p></div>
+        <div class="native-alert-actions"><button id="connection-http-cancel" type="button">Cancel</button><button id="connection-http-allow" type="button">Allow Local HTTP</button></div>
+      </div>
+    </div>
+
+    <script>
+      const pages = new Set(["root", "connection", "connection-editor", "export", "metrics", "medications", "background", "background-registrations", "recent-events", "historical", "historical-metrics", "import", "pairings", "pairing-editor", "diagnostics", "data-management", "reset-sync-review", "delete-all-review", "privacy"]);
+      const sample = {
+        connection: "Connected",
+        metrics: 12,
+        medications: "On",
+        pairings: 3,
+        background: "On",
+        historicalImport: "Available"
+      };
+
+      function currentPage() {
+        const requested = new URLSearchParams(location.search).get("page") ?? "root";
+        return pages.has(requested) ? requested : "root";
+      }
+
+      function destination(page) {
+        const url = new URL(location.href);
+        url.searchParams.set("page", page);
+        const statePages = new Set(["pairings", "medications", "background", "background-registrations", "recent-events", "historical", "historical-metrics", "diagnostics", "reset-sync-review", "delete-all-review", "connection-editor"]);
+        if (!statePages.has(page)) url.searchParams.delete("state");
+        if (page !== "pairing-editor") url.searchParams.delete("mode");
+        return url;
+      }
+
+      function renderPage() {
+        const activePage = currentPage();
+        document.querySelectorAll(".page").forEach((page) => {
+          page.classList.toggle("active", page.dataset.page === activePage);
+        });
+        document.querySelectorAll("[data-go]").forEach((link) => {
+          link.href = destination(link.dataset.go);
+        });
+        const active = document.querySelector(`.page[data-page="${activePage}"]`);
+        document.title = `${active?.getAttribute("aria-label") ?? "Settings"} · HA Health Sync Prototype`;
+      }
+
+      function initializeMetricSelection() {
+        const rows = [...document.querySelectorAll('[data-page="metrics"] .metric-row')];
+        const toggles = rows.map((row) => row.querySelector('input[type="checkbox"]'));
+        const count = document.querySelector("#selection-count");
+        const save = document.querySelector("#save-metrics");
+
+        function updateSelection() {
+          const selected = toggles.filter((toggle) => toggle.checked).length;
+          count.textContent = `${selected} selected`;
+          save.textContent = selected === 1 ? "Save 1 Metric" : `Save ${selected} Metrics`;
+          save.disabled = selected === 0;
+        }
+
+        toggles.forEach((toggle) => toggle.addEventListener("change", updateSelection));
+        document.querySelector("#select-all").addEventListener("click", () => { toggles.forEach((toggle) => toggle.checked = true); updateSelection(); });
+        document.querySelector("#clear-all").addEventListener("click", () => { toggles.forEach((toggle) => toggle.checked = false); updateSelection(); });
+        document.querySelector("#metric-search").addEventListener("input", (event) => {
+          const query = event.target.value.trim().toLocaleLowerCase();
+          rows.forEach((row) => row.hidden = !row.dataset.name.toLocaleLowerCase().includes(query));
+          document.querySelectorAll('[data-page="metrics"] .metric-section').forEach((section) => {
+            section.hidden = ![...section.querySelectorAll(".metric-row")].some((row) => !row.hidden);
+          });
+        });
+        save.addEventListener("click", () => { save.textContent = "Saved"; setTimeout(updateSelection, 700); });
+        updateSelection();
+      }
+
+      function renderPairingState() {
+        const empty = new URLSearchParams(location.search).get("state") === "empty";
+        document.querySelector("#pairing-list").hidden = empty;
+        document.querySelector("#pairing-empty").hidden = !empty;
+        document.querySelectorAll("[data-pairing-state]").forEach((link) => {
+          const state = link.dataset.pairingState;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "pairings");
+          if (state === "empty") url.searchParams.set("state", "empty"); else url.searchParams.delete("state");
+          link.href = url;
+          link.classList.toggle("active", empty ? state === "empty" : state === "populated");
+        });
+      }
+
+      function initializePairingEditor() {
+        const mode = new URLSearchParams(location.search).get("mode") === "edit" ? "edit" : "new";
+        const entity = document.querySelector("#pairing-entity");
+        const title = document.querySelector("#pairing-editor-title");
+        const validation = document.querySelector("#entity-validation");
+        const destinationPicker = document.querySelector("#pairing-destination");
+        const sourcePicker = document.querySelector("#pairing-source-unit");
+        const nativeUnit = document.querySelector("#pairing-healthkit-unit");
+        const enabled = document.querySelector("#pairing-enabled");
+        const transformation = document.querySelector("#pairing-transformation");
+
+        title.textContent = mode === "edit" ? "Edit Pairing" : "New Pairing";
+        entity.value = mode === "edit" ? "sensor.smart_scale_weight" : "";
+        destinationPicker.value = "bodyMass";
+        sourcePicker.innerHTML = '<option value="kg">kg</option><option value="lb">lb</option>';
+        sourcePicker.value = "kg";
+        nativeUnit.textContent = "kg";
+        enabled.checked = true;
+
+        const destinationUnits = {
+          bodyMass: { native: "kg", sources: ["kg", "lb"] },
+          bloodGlucose: { native: "mmol/L", sources: ["mmol/L", "mg/dL"] },
+          heartRate: { native: "count/min", sources: ["count/min"] },
+          dietaryWater: { native: "mL", sources: ["mL", "L"] }
+        };
+
+        destinationPicker.addEventListener("change", () => {
+          const units = destinationUnits[destinationPicker.value];
+          nativeUnit.textContent = units.native;
+          sourcePicker.innerHTML = units.sources.map((unit) => `<option value="${unit}">${unit}</option>`).join("");
+        });
+
+        transformation.addEventListener("change", () => {
+          const value = transformation.value;
+          document.querySelector("#primary-constant-row").hidden = value === "identity";
+          document.querySelector("#offset-constant-row").hidden = value !== "affine";
+          document.querySelector("#primary-constant-label").textContent = value === "add" ? "Amount" : "Multiplier";
+        });
+
+        document.querySelector("#save-pairing").addEventListener("click", () => {
+          const valid = /^[a-z0-9_]+\.[a-z0-9_]+$/.test(entity.value.trim());
+          validation.hidden = valid;
+          if (valid) document.querySelector("#save-pairing").textContent = "Saved";
+        });
+        entity.addEventListener("input", () => validation.hidden = true);
+
+        document.querySelectorAll("[data-editor-mode]").forEach((link) => {
+          const linkMode = link.dataset.editorMode;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "pairing-editor");
+          url.searchParams.set("mode", linkMode);
+          link.href = url;
+          link.classList.toggle("active", linkMode === mode);
+        });
+      }
+
+      function renderMedicationState() {
+        const requested = new URLSearchParams(location.search).get("state");
+        const state = requested === "authorized" || requested === "empty" ? requested : "before";
+        const section = document.querySelector("#authorized-medications");
+        const list = document.querySelector("#authorized-medication-list");
+        const toggle = document.querySelector("#medication-sync-toggle");
+
+        section.hidden = state === "before";
+        list.replaceChildren();
+        if (state === "authorized") {
+          ["Example medication", "Authorized medication"].forEach((name) => {
+            const row = document.createElement("div");
+            row.className = "form-row";
+            const label = document.createElement("span");
+            label.className = "form-label";
+            label.textContent = name;
+            const check = document.createElement("span");
+            check.className = "medication-check";
+            check.textContent = "✓";
+            row.append(label, check);
+            list.append(row);
+          });
+        } else if (state === "empty") {
+          const empty = document.createElement("div");
+          empty.className = "medication-empty";
+          empty.textContent = "No medications were authorized.";
+          list.append(empty);
+        }
+
+        toggle.checked = state !== "empty";
+        toggle.disabled = state === "empty";
+        document.querySelectorAll("[data-medication-state]").forEach((link) => {
+          const linkState = link.dataset.medicationState;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "medications");
+          if (linkState === "before") url.searchParams.delete("state"); else url.searchParams.set("state", linkState);
+          link.href = url;
+          link.classList.toggle("active", linkState === state);
+        });
+      }
+
+      document.querySelector("#choose-medications").addEventListener("click", () => {
+        const url = new URL(location.href);
+        url.searchParams.set("page", "medications");
+        url.searchParams.set("state", "authorized");
+        history.replaceState({}, "", url);
+        renderMedicationState();
+      });
+
+      function backgroundState() {
+        const requested = new URLSearchParams(location.search).get("state");
+        return requested === "disabled" || requested === "attention" ? requested : "healthy";
+      }
+
+      function renderBackgroundState() {
+        const state = backgroundState();
+        const toggle = document.querySelector("#background-sync-toggle");
+        const lastAttempt = document.querySelector("#background-last-attempt");
+        const lastSuccess = document.querySelector("#background-last-success");
+        const lastFailure = document.querySelector("#background-last-failure");
+        const summary = document.querySelector("#background-registration-summary");
+        const rows = [...document.querySelectorAll(".registration-row")];
+
+        toggle.checked = state !== "disabled";
+        lastAttempt.textContent = state === "disabled" ? "Today, 8:12" : "Today, 9:39";
+        lastSuccess.textContent = state === "attention" ? "Yesterday, 22:14" : state === "disabled" ? "Today, 8:12" : "Today, 9:39";
+        lastFailure.textContent = state === "attention" ? "Authorization" : "None";
+        lastFailure.classList.toggle("status-warning", state === "attention");
+
+        const summaries = {
+          healthy: ["12 of 12 Registered", "status-good"],
+          disabled: ["12 Disabled", ""],
+          attention: ["10 of 12 Registered", "status-warning"]
+        };
+        summary.textContent = summaries[state][0];
+        summary.className = `form-value ${summaries[state][1]}`.trim();
+
+        rows.forEach((row) => {
+          const status = row.querySelector(".registration-status");
+          let value = state === "disabled" ? "Disabled" : "Registered";
+          let className = state === "healthy" ? "status-good" : "";
+          if (state === "attention" && row.dataset.metric === "Body Weight") {
+            value = "Failed: authorization";
+            className = "status-warning";
+          } else if (state === "attention" && row.dataset.metric === "REM Sleep") {
+            value = "Unavailable";
+            className = "status-warning";
+          } else if (state === "attention") {
+            className = "status-good";
+          }
+          status.textContent = value;
+          status.className = `form-value registration-status ${className}`.trim();
+        });
+
+        document.querySelectorAll("[data-background-state]").forEach((link) => {
+          const linkState = link.dataset.backgroundState;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "background");
+          if (linkState === "healthy") url.searchParams.delete("state"); else url.searchParams.set("state", linkState);
+          link.href = url;
+          link.classList.toggle("active", linkState === state);
+        });
+      }
+
+      document.querySelector("#background-sync-toggle").addEventListener("change", (event) => {
+        const url = new URL(location.href);
+        url.searchParams.set("page", "background");
+        if (event.target.checked) url.searchParams.delete("state"); else url.searchParams.set("state", "disabled");
+        history.replaceState({}, "", url);
+        renderBackgroundState();
+      });
+
+      function initializeRecentSyncEvents() {
+        const list = document.querySelector("#recent-sync-event-list");
+        const spacer = document.querySelector("#recent-sync-event-spacer");
+        const rowHeight = 68;
+        const buffer = 4;
+        const triggers = ["Background", "Manual", "Pull to Refresh", "Shortcut"];
+        const events = Array.from({ length: 100 }, (_, index) => ({
+          id: index + 1,
+          trigger: triggers[index % triggers.length],
+          time: index < 12 ? `Today, ${String(9 - Math.floor(index / 6)).padStart(2, "0")}:${String(39 - (index * 3) % 36).padStart(2, "0")}` : `${Math.ceil(index / 12)} days ago`,
+          summary: index > 0 && index % 11 === 0 ? "Failed: HealthKit" : `Synced ${12 - (index % 4)}, skipped ${index % 3}`
+        }));
+
+        document.querySelector("#recent-events-count").textContent = `${events.length} Events`;
+        list.setAttribute("aria-label", `${events.length} recent sync events`);
+        spacer.style.height = `${events.length * rowHeight}px`;
+
+        function renderWindow() {
+          const start = Math.max(0, Math.floor(list.scrollTop / rowHeight) - buffer);
+          const end = Math.min(events.length, Math.ceil((list.scrollTop + list.clientHeight) / rowHeight) + buffer);
+          const fragment = document.createDocumentFragment();
+          for (let index = start; index < end; index += 1) {
+            const event = events[index];
+            const row = document.createElement("div");
+            row.className = "sync-event-row";
+            row.dataset.eventIndex = String(index);
+            row.style.top = `${index * rowHeight}px`;
+            row.setAttribute("role", "listitem");
+            row.setAttribute("aria-label", `${event.trigger}, ${event.time}, ${event.summary}`);
+            row.innerHTML = `<span class="event-copy"><span class="event-trigger"></span><span class="event-summary"></span></span><span class="event-time"></span>`;
+            row.querySelector(".event-trigger").textContent = event.trigger;
+            row.querySelector(".event-summary").textContent = event.summary;
+            row.querySelector(".event-time").textContent = event.time;
+            fragment.append(row);
+          }
+          spacer.replaceChildren(fragment);
+          list.dataset.windowStart = String(start);
+          list.dataset.windowEnd = String(end);
+        }
+
+        list.addEventListener("scroll", renderWindow, { passive: true });
+        renderWindow();
+      }
+
+      function historicalState() {
+        const requested = new URLSearchParams(location.search).get("state");
+        return ["running", "completed", "incompatible"].includes(requested) ? requested : "setup";
+      }
+
+      function renderHistoricalState() {
+        const state = historicalState();
+        const toggle = document.querySelector("#historical-import-toggle");
+        const capability = document.querySelector("#historical-capability");
+        const start = document.querySelector("#historical-import-start");
+        document.querySelector("#historical-ready-section").hidden = state === "running";
+        document.querySelector("#historical-running-section").hidden = state !== "running";
+        document.querySelector("#historical-report-section").hidden = state !== "completed";
+
+        toggle.checked = state !== "setup";
+        toggle.disabled = state === "running";
+        capability.textContent = state === "incompatible" ? "Incompatible · Recorder Schema" : "Available · Protocol 1";
+        capability.className = `form-value ${state === "incompatible" ? "status-warning" : "status-good"}`;
+        start.disabled = state === "setup" || state === "incompatible";
+
+        document.querySelectorAll("[data-historical-state]").forEach((link) => {
+          const linkState = link.dataset.historicalState;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "historical");
+          if (linkState === "setup") url.searchParams.delete("state"); else url.searchParams.set("state", linkState);
+          link.href = url;
+          link.classList.toggle("active", linkState === state);
+        });
+      }
+
+      function initializeHistoricalMetrics() {
+        const toggles = [...document.querySelectorAll(".historical-metric-row input")];
+        const count = document.querySelector("#historical-selection-count");
+        function updateCount() {
+          const selected = toggles.filter((toggle) => toggle.checked).length;
+          count.textContent = `${selected} selected`;
+        }
+        toggles.forEach((toggle) => toggle.addEventListener("change", updateCount));
+        document.querySelector("#historical-select-all").addEventListener("click", () => { toggles.forEach((toggle) => toggle.checked = true); updateCount(); });
+        document.querySelector("#historical-clear-all").addEventListener("click", () => { toggles.forEach((toggle) => toggle.checked = false); updateCount(); });
+        updateCount();
+      }
+
+      const historicalToggle = document.querySelector("#historical-import-toggle");
+      historicalToggle.addEventListener("change", () => {
+        if (historicalToggle.checked && historicalState() === "setup") {
+          historicalToggle.checked = false;
+          document.querySelector("#historical-enable-alert").hidden = false;
+        }
+      });
+      document.querySelector("#historical-alert-cancel").addEventListener("click", () => {
+        document.querySelector("#historical-enable-alert").hidden = true;
+      });
+      document.querySelector("#historical-alert-enable").addEventListener("click", () => {
+        document.querySelector("#historical-enable-alert").hidden = true;
+        historicalToggle.checked = true;
+        document.querySelector("#historical-import-start").disabled = false;
+      });
+      document.querySelector("#historical-import-start").addEventListener("click", () => {
+        const url = new URL(location.href);
+        url.searchParams.set("page", "historical");
+        url.searchParams.set("state", "running");
+        history.replaceState({}, "", url);
+        renderHistoricalState();
+      });
+      document.querySelector("#historical-import-cancel").addEventListener("click", () => {
+        const url = new URL(location.href);
+        url.searchParams.set("page", "historical");
+        url.searchParams.delete("state");
+        history.replaceState({}, "", url);
+        renderHistoricalState();
+      });
+
+      function diagnosticsState() {
+        const requested = new URLSearchParams(location.search).get("state");
+        return requested === "preparing" || requested === "failed" ? requested : "ready";
+      }
+
+      function renderDiagnosticsState() {
+        const state = diagnosticsState();
+        const button = document.querySelector("#diagnostics-export");
+        document.querySelector("#diagnostics-export-label").hidden = state === "preparing";
+        document.querySelector("#diagnostics-export-progress").hidden = state !== "preparing";
+        document.querySelector("#diagnostics-issue").hidden = state !== "failed";
+        button.disabled = state === "preparing";
+        document.querySelectorAll("[data-diagnostics-state]").forEach((link) => {
+          const linkState = link.dataset.diagnosticsState;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "diagnostics");
+          if (linkState === "ready") url.searchParams.delete("state"); else url.searchParams.set("state", linkState);
+          link.href = url;
+          link.classList.toggle("active", linkState === state);
+        });
+      }
+
+      document.querySelector("#diagnostics-export").addEventListener("click", () => {
+        const url = new URL(location.href);
+        url.searchParams.set("page", "diagnostics");
+        url.searchParams.set("state", "preparing");
+        history.replaceState({}, "", url);
+        renderDiagnosticsState();
+      });
+
+      function maintenanceState() {
+        const requested = new URLSearchParams(location.search).get("state");
+        return ["working", "success", "partial"].includes(requested) ? requested : "ready";
+      }
+
+      function renderMaintenanceState() {
+        const activePage = currentPage();
+        ["reset-sync-review", "delete-all-review"].forEach((page) => {
+          const state = activePage === page ? maintenanceState() : "ready";
+          document.querySelector(`[data-maintenance-ready="${page}"]`).hidden = state === "working" || (page === "delete-all-review" && state === "success");
+          document.querySelector(`[data-maintenance-working="${page}"]`).hidden = state !== "working";
+          document.querySelector(`[data-maintenance-result="${page}"]`).hidden = state !== "success" && state !== "partial";
+          const result = document.querySelector(`[data-maintenance-result-copy="${page}"]`);
+          if (state === "success") {
+            result.textContent = page === "delete-all-review" ? "Local app data was deleted. Returning to onboarding…" : "Synchronization state was reset.";
+          } else if (state === "partial") {
+            result.textContent = "Partial cleanup: 1 local operation failed. No paths, credentials, or values were retained in this message.";
+          } else {
+            result.textContent = "";
+          }
+          document.querySelectorAll(`[data-maintenance-page="${page}"]`).forEach((link) => {
+            const linkState = link.dataset.maintenanceState;
+            const url = new URL(location.href);
+            url.searchParams.set("page", page);
+            if (linkState === "ready") url.searchParams.delete("state"); else url.searchParams.set("state", linkState);
+            link.href = url;
+            link.classList.toggle("active", linkState === state);
+          });
+        });
+      }
+
+      const maintenanceActions = {
+        reset: {
+          page: "reset-sync-review",
+          review: "Settings, credentials, and pairings remain. Sync checkpoints and status are removed.",
+          reviewAction: "Review Reset",
+          title: "Reset Synchronization State?",
+          message: "This does not delete Apple Health samples or Home Assistant data.",
+          confirm: "Reset Synchronization State"
+        },
+        delete: {
+          page: "delete-all-review",
+          review: "All HA Health Sync local data and both Keychain credentials will be removed.",
+          reviewAction: "Review Delete",
+          title: "Delete All Local App Data?",
+          message: "This cannot be undone. Apple Health samples and Home Assistant data remain untouched.",
+          confirm: "Delete All Local App Data"
+        }
+      };
+      let pendingMaintenanceAction = null;
+
+      document.querySelectorAll("[data-maintenance-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+          pendingMaintenanceAction = button.dataset.maintenanceAction;
+          const copy = maintenanceActions[pendingMaintenanceAction];
+          document.querySelector("#maintenance-review-copy").textContent = copy.review;
+          document.querySelector("#maintenance-review-action").textContent = copy.reviewAction;
+          document.querySelector("#maintenance-review-dialog").hidden = false;
+        });
+      });
+      document.querySelector("#maintenance-review-cancel").addEventListener("click", () => {
+        pendingMaintenanceAction = null;
+        document.querySelector("#maintenance-review-dialog").hidden = true;
+      });
+      document.querySelector("#maintenance-review-action").addEventListener("click", () => {
+        const copy = maintenanceActions[pendingMaintenanceAction];
+        document.querySelector("#maintenance-review-dialog").hidden = true;
+        document.querySelector("#maintenance-alert-title").textContent = copy.title;
+        document.querySelector("#maintenance-alert-message").textContent = copy.message;
+        document.querySelector("#maintenance-alert-confirm").textContent = copy.confirm;
+        document.querySelector("#maintenance-final-alert").hidden = false;
+      });
+      document.querySelector("#maintenance-alert-cancel").addEventListener("click", () => {
+        pendingMaintenanceAction = null;
+        document.querySelector("#maintenance-final-alert").hidden = true;
+      });
+      document.querySelector("#maintenance-alert-confirm").addEventListener("click", () => {
+        const copy = maintenanceActions[pendingMaintenanceAction];
+        const url = new URL(location.href);
+        url.searchParams.set("page", copy.page);
+        url.searchParams.set("state", "working");
+        history.replaceState({}, "", url);
+        document.querySelector("#maintenance-final-alert").hidden = true;
+        pendingMaintenanceAction = null;
+        renderMaintenanceState();
+      });
+
+      function connectionEditorState() {
+        const requested = new URLSearchParams(location.search).get("state");
+        return ["testing", "success", "failed", "validation"].includes(requested) ? requested : "existing";
+      }
+
+      function renderConnectionEditorState() {
+        const state = connectionEditorState();
+        const baseURL = document.querySelector("#connection-base-url");
+        const userID = document.querySelector("#connection-user-id");
+        const webhookSecret = document.querySelector("#connection-webhook-secret");
+        const accessToken = document.querySelector("#connection-access-token");
+        const validation = document.querySelector("#connection-validation");
+        const save = document.querySelector("#save-connection-editor");
+        baseURL.value = state === "validation" ? "" : "https://homeassistant.local:8123";
+        userID.value = "health_bridge_user";
+        webhookSecret.value = "";
+        accessToken.value = "";
+        validation.hidden = state !== "validation";
+        save.disabled = state === "validation";
+        document.querySelector("#connection-http-alert").hidden = true;
+        document.querySelector("#connection-test-webhook").disabled = true;
+        document.querySelector("#connection-test-api").disabled = true;
+        renderConnectionTestResult("webhook", state);
+        renderConnectionTestResult("api", state);
+        document.querySelectorAll("[data-connection-state]").forEach((link) => {
+          const linkState = link.dataset.connectionState;
+          const url = new URL(location.href);
+          url.searchParams.set("page", "connection-editor");
+          if (linkState === "existing") url.searchParams.delete("state"); else url.searchParams.set("state", linkState);
+          link.href = url;
+          link.classList.toggle("active", linkState === state);
+        });
+      }
+
+      function renderConnectionTestResult(context, state) {
+        const result = document.querySelector(`#connection-${context}-result`);
+        const label = result.querySelector(".form-label");
+        const version = context === "webhook" ? document.querySelector("#connection-webhook-version") : null;
+        result.className = "form-row connection-result";
+        result.hidden = state === "existing" || state === "validation";
+        if (version) version.hidden = state !== "success";
+        if (state === "testing") {
+          label.textContent = "◷  Testing…";
+        } else if (state === "success") {
+          result.classList.add("good");
+          label.textContent = "✓  Connection succeeded";
+        } else if (state === "failed") {
+          result.classList.add("failed");
+          label.textContent = context === "webhook"
+            ? "Webhook secret error: Health Bridge rejected the secret."
+            : "Token error: Home Assistant rejected the access token.";
+        }
+      }
+
+      function updateConnectionEditorValidation() {
+        const baseURL = document.querySelector("#connection-base-url").value.trim();
+        const userID = document.querySelector("#connection-user-id").value.trim();
+        const valid = baseURL.length > 0 && userID.length > 0;
+        document.querySelector("#connection-validation").hidden = valid;
+        document.querySelector("#save-connection-editor").disabled = !valid;
+        return valid;
+      }
+
+      document.querySelectorAll("#connection-base-url, #connection-user-id").forEach((field) => {
+        field.addEventListener("input", updateConnectionEditorValidation);
+      });
+      document.querySelector("#connection-webhook-secret").addEventListener("input", (event) => {
+        document.querySelector("#connection-test-webhook").disabled = event.target.value.trim().length === 0;
+        document.querySelector("#connection-webhook-result").hidden = true;
+        document.querySelector("#connection-webhook-version").hidden = true;
+      });
+      document.querySelector("#connection-access-token").addEventListener("input", (event) => {
+        document.querySelector("#connection-test-api").disabled = event.target.value.trim().length === 0;
+        document.querySelector("#connection-api-result").hidden = true;
+      });
+      document.querySelector("#connection-test-webhook").addEventListener("click", () => {
+        renderConnectionTestResult("webhook", "testing");
+        document.querySelector("#connection-test-webhook").disabled = true;
+      });
+      document.querySelector("#connection-test-api").addEventListener("click", () => {
+        renderConnectionTestResult("api", "testing");
+        document.querySelector("#connection-test-api").disabled = true;
+      });
+      document.querySelector("#save-connection-editor").addEventListener("click", () => {
+        if (updateConnectionEditorValidation()) document.querySelector("#save-connection-editor").textContent = "Saved";
+      });
+      document.querySelector("#connection-local-http").addEventListener("change", (event) => {
+        if (event.target.checked) {
+          event.target.checked = false;
+          document.querySelector("#connection-http-alert").hidden = false;
+        }
+      });
+      document.querySelector("#connection-http-cancel").addEventListener("click", () => {
+        document.querySelector("#connection-http-alert").hidden = true;
+      });
+      document.querySelector("#connection-http-allow").addEventListener("click", () => {
+        document.querySelector("#connection-http-alert").hidden = true;
+        document.querySelector("#connection-local-http").checked = true;
+      });
+
+      renderPage();
+      initializeMetricSelection();
+      renderPairingState();
+      initializePairingEditor();
+      renderMedicationState();
+      renderBackgroundState();
+      initializeRecentSyncEvents();
+      renderHistoricalState();
+      initializeHistoricalMetrics();
+      renderDiagnosticsState();
+      renderMaintenanceState();
+      renderConnectionEditorState();
+    </script>
+  </body>
+</html>

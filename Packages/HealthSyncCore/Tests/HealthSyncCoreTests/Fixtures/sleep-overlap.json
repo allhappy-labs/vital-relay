@@ -1,0 +1,11 @@
+{
+  "description": "Synthetic overlapping sleep stages with no personal health data",
+  "expected_total_sleep_seconds": 8400,
+  "intervals": [
+    { "id": "00000000-0000-0000-0000-000000000001", "stage": "core", "start_offset": 600, "duration": 3600 },
+    { "id": "00000000-0000-0000-0000-000000000002", "stage": "deep", "start_offset": 3000, "duration": 3600 },
+    { "id": "00000000-0000-0000-0000-000000000003", "stage": "rem", "start_offset": 6000, "duration": 1800 },
+    { "id": "00000000-0000-0000-0000-000000000004", "stage": "awake", "start_offset": 7800, "duration": 600 },
+    { "id": "00000000-0000-0000-0000-000000000005", "stage": "asleepUnspecified", "start_offset": 8400, "duration": 1200 }
+  ]
+}

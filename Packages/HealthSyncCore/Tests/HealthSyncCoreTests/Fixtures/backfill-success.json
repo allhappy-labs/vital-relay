@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "committed": true,
+  "protocol_version": 1,
+  "request_id": "backfill.01234567",
+  "recorder_schema": 53,
+  "database": "sqlite",
+  "received": 2,
+  "inserted": 2,
+  "skipped": 0,
+  "entities": 1,
+  "statistics_policy": "history_only"
+}

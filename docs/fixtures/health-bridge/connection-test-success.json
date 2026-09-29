@@ -1,0 +1,7 @@
+{
+  "backfill_ack": "committed",
+  "backfill_protocol": 1,
+  "integration_version": "1.2.1",
+  "ok": true,
+  "statistics_policy": "history_only"
+}
