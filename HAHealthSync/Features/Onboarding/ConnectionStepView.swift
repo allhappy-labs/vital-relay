@@ -29,7 +29,7 @@ struct ConnectionStepView: View {
       Section {
         Link(
           destination: URL(
-            string: "https://github.com/allhappy-labs/HAHealthSync/blob/main/SETUP.md")!
+            string: "https://github.com/allhappy-labs/vital-relay/blob/main/SETUP.md")!
         ) {
           Label("Setup Instructions", systemImage: "book")
         }
