@@ -544,6 +544,9 @@ private actor UITestArchiveCoordinator: ArchiveImportCoordinating {
     report.archiveState = .archived
     report.archivedSamples = 12
     report.projectionStates[.steps] = .failed
+    report.typeProgress[.stepCount] = ArchiveTypeProgress(
+      range: DateInterval(start: Date(timeIntervalSince1970: 1_700_000_000), duration: 86_400),
+      fraction: 1, isComplete: true)
     if recoveryRequired {
       report.archiveState = .paused
       report.failures = [

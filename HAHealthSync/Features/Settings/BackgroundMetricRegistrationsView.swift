@@ -14,10 +14,15 @@ struct BackgroundMetricRegistrationsView: View {
         )
       } else {
         ForEach(selectedDefinitions, id: \.id) { definition in
-          LabeledContent(
-            definition.displayName,
-            value: registrationDescription(for: definition.id)
-          )
+          LabeledContent {
+            Text(registrationDescription(for: definition.id))
+              .foregroundStyle(registrationTone(for: definition.id)?.color ?? .secondary)
+          } label: {
+            TileLabel(
+              definition.displayName, systemImage: definition.category.symbol,
+              tint: definition.category.tint)
+          }
+          .accessibilityElement(children: .combine)
           .accessibilityIdentifier("background-registration-\(definition.id.rawValue)")
         }
       }
@@ -29,6 +34,15 @@ struct BackgroundMetricRegistrationsView: View {
   private var selectedDefinitions: [MetricDefinition] {
     MetricRegistry.selectable.filter {
       model.currentConfiguration.selectedMetrics.contains($0.id)
+    }
+  }
+
+  private func registrationTone(for metric: MetricID) -> StatusTone? {
+    switch model.syncStatus.registrations[metric] {
+    case .registered: .synced
+    case .failed: .failed
+    case .unavailable: .attention
+    case .disabled, .none: nil
     }
   }
 

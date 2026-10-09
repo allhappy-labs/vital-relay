@@ -6,13 +6,20 @@ struct DataManagementView: View {
   var body: some View {
     List {
       Section {
-        NavigationLink("Reset Synchronization State") {
+        NavigationLink {
           ResetSynchronizationStateReviewView()
+        } label: {
+          TileLabel(
+            "Reset Synchronization State", systemImage: "arrow.counterclockwise",
+            tint: StatusTone.attention.color)
         }
         .accessibilityIdentifier("reset-sync-state-destination")
 
-        NavigationLink("Delete All Local App Data") {
+        NavigationLink {
           DeleteAllLocalDataReviewView()
+        } label: {
+          TileLabel(
+            "Delete All Local App Data", systemImage: "trash.fill", tint: StatusTone.failed.color)
         }
         .accessibilityIdentifier("delete-all-data-destination")
       } footer: {

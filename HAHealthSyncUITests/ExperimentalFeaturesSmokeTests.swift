@@ -38,15 +38,13 @@ final class ExperimentalFeaturesSmokeTests: XCTestCase {
     XCTAssertTrue(scrollToExistence(settings, in: app))
     settings.tap()
 
-    let owner = app.staticTexts["historical-import-owner-state"]
-    XCTAssertTrue(scrollToExistence(owner, in: app))
-    XCTAssertTrue(owner.label.contains("approved archive uploader"))
-    XCTAssertFalse(owner.label.contains("fixture-secret"))
+    // Before any import the card offers the start action.
+    XCTAssertTrue(
+      app.staticTexts["historical-import-progress-headline"].waitForExistence(
+        timeout: UITestWait.standard))
     let allHistory = app.switches["historical-import-all-readable"]
     XCTAssertTrue(scrollToExistence(allHistory, in: app))
     XCTAssertEqual(allHistory.value as? String, "1")
-    let capability = app.staticTexts["historical-import-capability"]
-    XCTAssertTrue(capability.label.contains("Archive protocol 2"))
     let metrics = app.buttons["historical-eligible-metrics"]
     XCTAssertTrue(scrollToExistence(metrics, in: app))
     metrics.tap()
@@ -55,15 +53,29 @@ final class ExperimentalFeaturesSmokeTests: XCTestCase {
         app.staticTexts["historical-import-earliest-steps"], in: app))
     app.navigationBars.buttons.element(boundBy: 0).tap()
 
+    openArchiveDetails(in: app)
+    let owner = app.staticTexts["historical-import-owner-state"]
+    XCTAssertTrue(scrollToExistence(owner, in: app))
+    XCTAssertTrue(owner.label.contains("approved archive uploader"))
+    XCTAssertFalse(owner.label.contains("fixture-secret"))
+    let capability = app.staticTexts["historical-import-capability"]
+    XCTAssertTrue(capability.label.contains("Archive protocol 2"))
     let privacy = app.staticTexts["historical-import-privacy"]
     XCTAssertTrue(scrollToExistence(privacy, in: app))
     XCTAssertTrue(privacy.label.contains("long-lived copy"))
+    closeArchiveDetails(in: app)
+
     let start = app.buttons["historical-import-start"]
     XCTAssertTrue(scrollToExistence(start, in: app))
     start.tap()
     let archived = app.descendants(matching: .any)["historical-import-archived-samples"]
     XCTAssertTrue(scrollToExistence(archived, in: app))
     XCTAssertTrue(archived.label.contains("12"))
+    XCTAssertTrue(
+      app.descendants(matching: .any)["historical-import-type-HKQuantityTypeIdentifierStepCount"]
+        .exists)
+
+    openArchiveDetails(in: app)
     let statistics = app.descendants(matching: .any)["historical-import-statistics-steps"]
     XCTAssertTrue(scrollToExistence(statistics, in: app))
     XCTAssertTrue(statistics.label.contains("Failed"))
@@ -199,6 +211,18 @@ final class ExperimentalFeaturesSmokeTests: XCTestCase {
 
   private func tapSwitch(_ element: XCUIElement) {
     element.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+  }
+
+  private func openArchiveDetails(in app: XCUIApplication) {
+    let details = app.buttons["historical-import-archive-details"]
+    XCTAssertTrue(scrollToExistence(details, in: app))
+    details.tap()
+    XCTAssertTrue(
+      app.navigationBars["Archive Details"].waitForExistence(timeout: UITestWait.standard))
+  }
+
+  private func closeArchiveDetails(in app: XCUIApplication) {
+    app.navigationBars["Archive Details"].buttons.element(boundBy: 0).tap()
   }
 
   private func scrollToExistence(

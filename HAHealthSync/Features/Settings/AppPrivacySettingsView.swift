@@ -4,13 +4,17 @@ struct AppPrivacySettingsView: View {
   var body: some View {
     List {
       Section {
-        NavigationLink("Diagnostics") {
+        NavigationLink {
           DiagnosticsView()
+        } label: {
+          TileLabel("Diagnostics", systemImage: "stethoscope", tint: .gray)
         }
         .accessibilityIdentifier("diagnostics-settings")
 
-        NavigationLink("Data Management") {
+        NavigationLink {
           DataManagementView()
+        } label: {
+          TileLabel("Data Management", systemImage: "externaldrive.fill", tint: .gray)
         }
         .accessibilityIdentifier("data-management-settings")
       } footer: {

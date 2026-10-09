@@ -1,3 +1,4 @@
+import HealthSyncCore
 import SwiftUI
 
 struct ImportSettingsView: View {
@@ -6,8 +7,12 @@ struct ImportSettingsView: View {
   var body: some View {
     List {
       Section {
-        NavigationLink("Entity Pairings") {
+        NavigationLink {
           PairingListView()
+        } label: {
+          TileLabel(
+            "Entity Pairings", systemImage: "arrow.left.arrow.right",
+            tint: MetricCategory.vitals.tint)
         }
         .accessibilityIdentifier("health-import-pairings")
       } footer: {
@@ -16,7 +21,7 @@ struct ImportSettingsView: View {
         )
       }
 
-      Section("Apple Health") {
+      Section {
         Button("Review Write Permissions") {
           Task {
             await model.requestHealthWriteAuthorization(
@@ -26,6 +31,10 @@ struct ImportSettingsView: View {
         }
         .disabled(model.pairings.isEmpty)
         .accessibilityIdentifier("import-review-write-permissions")
+      } header: {
+        Text("Apple Health")
+      } footer: {
+        Text("Only destinations used by your pairings are requested.")
       }
     }
     .navigationTitle("Import to Apple Health")

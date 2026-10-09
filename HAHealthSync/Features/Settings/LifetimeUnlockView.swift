@@ -58,13 +58,25 @@ struct LifetimeUnlockView: View {
   var body: some View {
     NavigationStack {
       List {
-        Section("Free with HA Health Sync") {
-          ForEach(presentation.freeFeatures, id: \.self) { Text($0) }
+        Section("Free with Health Sync") {
+          ForEach(presentation.freeFeatures, id: \.self) { feature in
+            Label {
+              Text(feature)
+            } icon: {
+              Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+            }
+          }
         }
         .accessibilityIdentifier("lifetime-unlock-free-features")
 
         Section("Lifetime unlock") {
-          ForEach(presentation.paidFeatures, id: \.self) { Text($0) }
+          ForEach(presentation.paidFeatures, id: \.self) { feature in
+            Label {
+              Text(feature)
+            } icon: {
+              Image(systemName: "checkmark.circle.fill").foregroundStyle(.yellow)
+            }
+          }
           Text(presentation.status)
             .foregroundStyle(.secondary)
             .accessibilityIdentifier("lifetime-unlock-status")
@@ -73,14 +85,18 @@ struct LifetimeUnlockView: View {
               .accessibilityIdentifier("lifetime-unlock-message")
           }
           if let purchaseTitle = presentation.purchaseTitle {
-            Button(purchaseTitle) {
+            Button {
               Task {
                 isBusy = true
                 let outcome = await unlock.purchase()
                 message = LifetimeUnlockPresentation.message(for: outcome)
                 isBusy = false
               }
+            } label: {
+              Text(purchaseTitle)
+                .frame(maxWidth: .infinity)
             }
+            .primaryActionStyle()
             .disabled(isBusy)
             .accessibilityIdentifier("lifetime-unlock-buy")
           }
@@ -126,7 +142,22 @@ struct LifetimeUnlockView: View {
         }
       }
       .navigationTitle("Lifetime Unlock")
+      .navigationBarTitleDisplayMode(.inline)
       .toolbar {
+        ToolbarItem(placement: .principal) {
+          Label {
+            Text("Lifetime Unlock")
+              .font(.headline)
+              .fontDesign(.rounded)
+          } icon: {
+            Image(
+              systemName: model.lifetimeAccessState == .unlocked
+                ? "checkmark.seal.fill" : "lock.open.fill"
+            )
+            .foregroundStyle(.yellow.gradient)
+          }
+          .labelStyle(.titleAndIcon)
+        }
         ToolbarItem(placement: .topBarTrailing) {
           Button("Done") { dismiss() }
             .accessibilityIdentifier("lifetime-unlock-done")

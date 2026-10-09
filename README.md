@@ -1,14 +1,27 @@
-# HA Health Sync
+# Health Sync
 
-HA Health Sync is an iPhone app that syncs selected Apple Health data directly with your own [Home Assistant](https://www.home-assistant.io/) through the [Health Bridge archive fork](https://github.com/allhappy-labs/Health_Bridge). It has no app account or hosted health-data service. The app and integration are separate projects; this app does not replace Apple's Health permissions or Home Assistant authentication.
+Health Sync sends selected Apple Health data from your iPhone to your own [Home Assistant](https://www.home-assistant.io/) through [Health Bridge](https://github.com/allhappy-labs/Health_Bridge). Choose what iOS may share, sync on demand, or use the lifetime unlock for best-effort background and Shortcuts sync. On supported iOS and Health Bridge versions, Historical Import can archive each metric from its earliest readable HealthKit sample. The app has no account or hosted health-data service; HealthKit permissions and Home Assistant authentication remain under your control.
+
+## In the app
+
+These real iPhone captures show the dashboard, export settings, background sync and a full-history import in progress. Personal health readings, in-app sync timestamps, and other apps' Live Activities have been redacted. The original 1206 × 2622 resolution is retained for documentation and App Store preparation.
+
+<p align="center">
+  <img src="docs/screenshots/health-sync-dashboard.png" alt="Dashboard with sync status, Sync Now, today's activity tiles and per-category value counts" width="200" />
+  <img src="docs/screenshots/export-to-home-assistant.png" alt="Export to Home Assistant settings with Health Metrics, Medications, Background Sync and Historical Import" width="200" />
+  <img src="docs/screenshots/background-sync-settings.png" alt="Background Sync settings with interval, last automatic sync, Shortcuts guide and Sync Details" width="200" />
+  <img src="docs/screenshots/historical-import.png" alt="Historical Import archiving with overall progress and per-type progress rows" width="200" />
+</p>
+
+See [What it does](#what-it-does) and [Set up the app](#set-up-the-app) for feature details and setup instructions.
 
 ## What it does
 
 - **Free:** connect to Home Assistant, select metrics and inbound pairings, and use **Sync Now**.
 - **Lifetime unlock:** enable best-effort background and Shortcuts sync plus historical import. The app displays the local App Store price and offers Restore Purchases; this is a one-time purchase, not a subscription. StoreKit/App Store availability is required for a normal purchase.
-- **Historical import:** on iOS 27, a compatible Health Bridge protocol-2 fork can archive each selected metric from its earliest readable HealthKit date, including original quantity, category, and workout samples. Older iOS versions or protocol-1 servers retain the experimental latest-14-days recorder import. A Home Assistant administrator must approve this iPhone as the archive uploader before protocol-2 writes.
+- **Historical import:** on iOS 27, a compatible Health Bridge protocol-2 fork can archive each selected metric from its earliest readable HealthKit date, including original quantity, category, and workout samples. The screen shows overall and per-type progress (the share of each type's history already confirmed by Home Assistant), what is being archived now, and a countdown while Home Assistant's per-minute upload limit pauses the import; paused imports resume where they stopped. Older iOS versions or protocol-1 servers retain the experimental latest-14-days recorder import. A Home Assistant administrator must approve this iPhone as the archive uploader before protocol-2 writes.
 
-Background execution depends on iOS scheduling and is not guaranteed at a fixed interval. HealthKit access is per type; the app imports only data that iOS makes readable. Medication data uses a separate opt-in authorization flow and is not included in the original-sample archive.
+Background execution depends on iOS scheduling and is not guaranteed at a fixed interval. Background Sync shows the last automatic sync and warns only when iOS is blocking it (Background App Refresh off or Low Power Mode); system state, registrations and recent sync events are under **Sync Details**. HealthKit access is per type; the app imports only data that iOS makes readable. Medication data uses a separate opt-in authorization flow and is not included in the original-sample archive.
 
 ## Requirements
 
@@ -20,10 +33,12 @@ The archive fork is currently a source prerelease, not a verified HACS release. 
 
 ## Set up the app
 
+Step-by-step instructions, including installing Health Bridge and finding each connection value, are in **[SETUP.md](SETUP.md)**; the app links there from its Connect screen. In short:
+
 1. Install the compatible Health Bridge fork if you want full history. Back up Home Assistant first. Add or keep a **Health Assistant Link** entry; do not recreate an existing entry just to upgrade the integration.
 2. Build and install the app with Xcode until a verified App Store/TestFlight listing is available. Open the app, choose the Apple Health metrics you want, and grant their read access. Grant write access separately only if you configure Home Assistant → Apple Health pairings.
 3. Enter your Home Assistant URL, Health Bridge user ID and webhook secret. Create a long-lived access token in your Home Assistant user profile and enter it in the app's separate API credential field. Test both connections, save, then tap **Sync Now**.
-4. For historical import, open Settings → Historical Import. On iOS 27, confirm Compatibility says **Archive protocol 2 available**, request archive-uploader approval, and compare the phone's fingerprint with the administrator archive card before approval. Choose the metrics and **All readable history** only after reviewing the privacy notice. If Compatibility says protocol 1, import remains limited to 14 days.
+4. For historical import, open Settings → Export to Home Assistant → Historical Import. On iOS 27 with protocol 2, the screen shows an approval step until this iPhone is the approved archive uploader: request approval and compare the fingerprint shown there with the administrator archive card. Choose the metrics and **All readable history** only after reviewing the privacy notice (**Learn more**), then tap **Archive Readable History**. **Archive Details** shows Health Bridge compatibility, the approval state, statistics status and archive deletion help. If the screen shows the 14-day experimental import instead, the server or iOS version supports only protocol 1.
 
 The original-sample archive is durable server data. Revoking Health access or deleting the app does **not** erase it; Home Assistant administrators and backups may retain it. See [archive operations](https://github.com/allhappy-labs/Health_Bridge/blob/main/docs/archive-operations.md) for browsing, export, backup and deletion. Protect the Home Assistant server and its backups accordingly.
 
@@ -45,4 +60,4 @@ The protocol-2 app and fork passed local automated and disposable Home Assistant
 
 ## License and upstream
 
-HA Health Sync is licensed under [MIT](LICENSE). The Health Bridge fork is a separate MIT-licensed derivative of [gregt1993/Health_Bridge](https://github.com/gregt1993/Health_Bridge), preserving its upstream history and attribution. MIT permits commercial reuse and modified distributions; it does not require contributors to publish their changes.
+Health Sync is licensed under [MIT](LICENSE). The Health Bridge fork is a separate MIT-licensed derivative of [gregt1993/Health_Bridge](https://github.com/gregt1993/Health_Bridge), preserving its upstream history and attribution. MIT permits commercial reuse and modified distributions; it does not require contributors to publish their changes.

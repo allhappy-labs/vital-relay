@@ -28,22 +28,32 @@ struct ShortcutsAutomationGuideView: View {
             Text(step)
           } icon: {
             Text("\(index + 1)")
-              .font(.headline.monospacedDigit())
+              .font(.subheadline.weight(.bold).monospacedDigit())
+              .foregroundStyle(.white)
+              .frame(width: 26, height: 26)
+              .background(Color.indigo, in: .circle)
           }
         }
       } footer: {
-        Text(
-          "Automations run the same sync as Sync Now. They are a supplement to background sync, which iOS schedules on its own."
+        InfoFooter(
+          "Automations run the same sync as Sync Now.",
+          details: "They are a supplement to background sync, which iOS schedules on its own."
         )
       }
 
       Section {
-        Button("Open Shortcuts") {
+        Button {
           if let url = URL(string: "shortcuts://") {
             openURL(url)
           }
+        } label: {
+          Text("Open Shortcuts")
+            .frame(maxWidth: .infinity)
         }
+        .primaryActionStyle()
         .accessibilityIdentifier("shortcuts-guide-open")
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
       }
     }
     .navigationTitle("Sync with Shortcuts")

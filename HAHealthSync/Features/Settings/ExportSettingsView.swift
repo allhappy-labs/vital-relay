@@ -1,3 +1,4 @@
+import HealthSyncCore
 import SwiftUI
 
 struct ExportSettingsView: View {
@@ -6,27 +7,40 @@ struct ExportSettingsView: View {
   var body: some View {
     List {
       Section("Data") {
-        NavigationLink("Health Metrics") {
+        NavigationLink {
           MetricSelectionView()
+        } label: {
+          TileLabel(
+            "Health Metrics", systemImage: "heart.text.square.fill",
+            tint: MetricCategory.vitals.tint)
         }
         .accessibilityIdentifier("choose-health-metrics")
 
         if model.medicationSyncAvailable {
-          NavigationLink("Medications") {
+          NavigationLink {
             MedicationSelectionView()
+          } label: {
+            TileLabel(
+              "Medications", systemImage: "pills.fill", tint: MetricCategory.bodyMeasurements.tint)
           }
           .accessibilityIdentifier("medication-sync-settings")
         }
       }
 
       Section("Automation") {
-        NavigationLink("Background Sync") {
+        NavigationLink {
           BackgroundSyncSettingsView()
+        } label: {
+          TileLabel("Background Sync", systemImage: "arrow.triangle.2.circlepath", tint: .green)
         }
         .accessibilityIdentifier("background-sync-settings")
 
-        NavigationLink("Historical Import") {
+        NavigationLink {
           HistoricalImportSettingsView()
+        } label: {
+          TileLabel(
+            "Historical Import", systemImage: "clock.arrow.circlepath",
+            tint: MetricCategory.sleep.tint)
         }
         .accessibilityIdentifier("historical-import-settings")
       }

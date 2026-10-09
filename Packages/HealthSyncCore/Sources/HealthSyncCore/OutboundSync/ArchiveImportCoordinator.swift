@@ -9,6 +9,9 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
   private let progress: @Sendable (ArchiveImportReport) async -> Void
   private var activeTask: Task<ArchiveImportReport, Never>?
   private var report = ArchiveImportReport()
+  /// The scan end of the current run. Progress is measured against it, not the live clock,
+  /// or every finished type would keep a tail gap up to `now` and never read complete.
+  private var runEnd: Date?
 
   public init(
     access: any PaidFeatureAccessing,
@@ -67,8 +70,31 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
   }
 
   private func perform(selection: ArchiveImportSelection) async -> ArchiveImportReport {
+    _ = await performImport(selection: selection)
+    // Every exit, including early returns, cancellation and failures, ends idle.
+    report.phase = .idle
+    await progress(report)
+    return report
+  }
+
+  private func setPhase(_ phase: ArchiveImportPhase) async {
+    report.phase = phase
+    await progress(report)
+  }
+
+  private func performImport(selection: ArchiveImportSelection) async -> ArchiveImportReport {
     report = ArchiveImportReport()
     report.archiveState = .importing
+    report.phase = .preparing
+    runEnd = nil
+    // Show saved progress straight away instead of flickering to empty while connecting.
+    // Read-only: the authoritative load and every check below are unchanged.
+    if let saved = try? await checkpointStore.load() {
+      report.archivedSamples = saved.archivedSamples
+      report.archivedDeletions = saved.archivedDeletions
+      report.typeProgress = ArchiveProgress.restored(checkpoint: saved, now: now())
+    }
+    await progress(report)
     var currentType: HealthObjectTypeID?
     var fallback = SyncFailureCategory.configuration
     do {
@@ -145,6 +171,10 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
           if case .noReadableSamples = $0.value { return $0.key }
           return nil
         })
+      let end = now()
+      runEnd = end
+      report.typeProgress = ArchiveProgress.make(checkpoint: state, now: end)
+      await progress(report)
       // Resolve the one durable journal before any other type can create a batch.
       if let pending = state.pending {
         currentType = pending.type
@@ -183,7 +213,6 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
           try await save(state)
         }
       }
-      let end = now()
       for type in Set(definitions.map(\.healthObjectType)).sorted(by: { $0.rawValue < $1.rawValue })
       {
         currentType = type
@@ -229,6 +258,7 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
           {
             let start = max(priorStart, boundary ?? priorStart)
             if start < end {
+              await setPhase(.checking(type))
               do {
                 try await reconcile(
                   type: type, interval: DateInterval(start: start, end: end),
@@ -242,7 +272,9 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
             report.failures.append(
               .init(type: type, category: .healthKit, issue: .reconciliationRequired))
           }
-          report.failures.append(.init(type: type, category: .healthKit, issue: .noReadableSamples))
+          // Discovery already records these metrics in noReadableMetrics. HealthKit
+          // does not disclose whether they are empty or unauthorized, so their
+          // absence alone must not turn an otherwise completed import into Paused.
           continue
         }
         let start = max(earliest, selection.requestedStart ?? earliest, boundary ?? earliest)
@@ -257,20 +289,25 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
         fallback = .healthKit
         var beforeReconciliation = state.types[type]
         do {
+          await setPhase(.archiving(type))
           if state.types[type]?.anchor == nil && state.types[type]?.baselineAnchor == nil {
             try await establishBaseline(type: type, interval: interval, state: &state)
           }
           try await scan(type: type, interval: interval, state: &state, connection: connection)
           beforeReconciliation = state.types[type]
+          await setPhase(.checking(type))
           try await reconcile(type: type, interval: interval, state: &state, connection: connection)
         } catch ArchiveQueryError.anchorInvalidated {
+          await setPhase(.archiving(type))
           try await invalidate(type: type, state: &state)
           try await establishBaseline(type: type, interval: interval, state: &state)
           try await scan(type: type, interval: interval, state: &state, connection: connection)
           beforeReconciliation = state.types[type]
+          await setPhase(.checking(type))
           try await reconcile(type: type, interval: interval, state: &state, connection: connection)
         }
         if state.types[type]?.reconciliationRequired == true {
+          await setPhase(.checking(type))
           do {
             try await reconcileInventory(
               type: type, interval: interval, state: &state, connection: connection)
@@ -297,6 +334,7 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
         }
         report.archivedSamples = state.archivedSamples
         report.archivedDeletions = state.archivedDeletions
+        report.typeProgress = ArchiveProgress.make(checkpoint: state, now: runEnd ?? now())
         await progress(report)
       }
       report.archiveState = report.failures.isEmpty ? .archived : .paused
@@ -533,7 +571,7 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
     else {
       throw ArchiveClientError.requestTooLarge
     }
-    let receipt = try await connection.sender.send(pending.batch, baseURL: connection.baseURL)
+    let receipt = try await sendRespectingRateLimit(pending.batch, connection: connection)
     do {
       try receipt.validate(
         requestID: pending.batch.requestID, batchID: pending.batch.batchID,
@@ -550,7 +588,34 @@ public actor ArchiveImportCoordinator: ArchiveImportCoordinating {
     state = committed
     report.archivedSamples = state.archivedSamples
     report.archivedDeletions = state.archivedDeletions
+    report.typeProgress = ArchiveProgress.make(checkpoint: state, now: runEnd ?? now())
     await progress(report)
+  }
+
+  private func sendRespectingRateLimit(
+    _ batch: ArchiveBatch, connection: ArchiveImportConnection
+  ) async throws -> ArchiveAcknowledgement {
+    var retries = 0
+    while true {
+      try Task.checkCancellation()
+      do {
+        return try await connection.sender.send(batch, baseURL: connection.baseURL)
+      } catch NetworkFailure.rateLimited(let retryAfter) {
+        // The archive endpoint has a per-minute batch budget. Keep the exact
+        // journaled batch and honor its Retry-After rather than stopping a
+        // large historical import every 60 requests.
+        guard let retryAfter, retries < 3 else {
+          throw NetworkFailure.rateLimited(retryAfter: retryAfter)
+        }
+        retries += 1
+        let delay = min(max(0, retryAfter), 60)
+        let resumePhase = report.phase
+        await setPhase(.waiting(until: now().addingTimeInterval(delay)))
+        try await Task.sleep(for: .seconds(delay))
+        await setPhase(resumePhase)
+        try await requireAccess()
+      }
+    }
   }
 
   private func requireAccess() async throws {

@@ -66,4 +66,10 @@ final class DashboardMetricFormatterTests: XCTestCase {
       "29 Aug 2026 at 20:30"
     )
   }
+
+  func testValueCountPluralises() {
+    XCTAssertEqual(DashboardMetricFormatter.valueCount(0), "0 values")
+    XCTAssertEqual(DashboardMetricFormatter.valueCount(1), "1 value")
+    XCTAssertEqual(DashboardMetricFormatter.valueCount(12), "12 values")
+  }
 }

@@ -7,6 +7,10 @@ enum DashboardMetricFormatter {
       .compactMap { state.readings[$0] }
   }
 
+  static func valueCount(_ count: Int) -> String {
+    count == 1 ? "1 value" : "\(count) values"
+  }
+
   static func value(
     _ value: Double,
     unit: UnitSymbol,

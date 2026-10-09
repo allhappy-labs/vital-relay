@@ -46,8 +46,11 @@ struct MetricSelectionView: View {
             Spacer()
           }
         }
+        .primaryActionStyle()
         .disabled(selection.isEmpty || isSaving)
         .accessibilityIdentifier("save-metric-selection")
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
       } footer: {
         Text("Only newly selected HealthKit types require another permission request.")
       }
@@ -99,11 +102,14 @@ struct MetricSelectionSections: View {
     ForEach(MetricCategory.allCases, id: \.self) { category in
       Section {
         ForEach(definitions(in: category), id: \.id) { definition in
-          Toggle(definition.displayName, isOn: binding(for: definition.id))
-            .accessibilityIdentifier("metric-\(definition.id.rawValue)")
+          Toggle(isOn: binding(for: definition.id)) {
+            TileLabel(definition.displayName, systemImage: category.symbol, tint: category.tint)
+          }
+          .accessibilityIdentifier("metric-\(definition.id.rawValue)")
         }
       } header: {
-        Text(title(for: category))
+        Text(category.title)
+          .foregroundStyle(category.tint)
           .accessibilityIdentifier("metric-category-\(category.rawValue)")
       }
     }
@@ -132,16 +138,6 @@ struct MetricSelectionSections: View {
 
   private var availableMetricIDs: Set<MetricID> {
     MetricSelectionPolicy.availableMetricIDs(osMajorVersion: currentOSMajorVersion)
-  }
-
-  private func title(for category: MetricCategory) -> String {
-    switch category {
-    case .activity: "Activity"
-    case .bodyMeasurements: "Body Measurements"
-    case .vitals: "Vitals"
-    case .sleep: "Sleep"
-    case .other: "Other"
-    }
   }
 }
 

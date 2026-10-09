@@ -55,8 +55,10 @@ struct PairingEditorView: View {
         .accessibilityIdentifier("pairing-source-unit")
         LabeledContent("HealthKit unit", value: destinationDefinition.nativeUnit.rawValue)
           .accessibilityIdentifier("pairing-destination-unit")
-        Toggle("Enabled", isOn: $isEnabled)
-          .accessibilityIdentifier("pairing-enabled")
+        Toggle(isOn: $isEnabled) {
+          TileLabel("Enabled", systemImage: "power", tint: .green)
+        }
+        .accessibilityIdentifier("pairing-enabled")
       } header: {
         Text("Apple Health")
       } footer: {
@@ -99,8 +101,8 @@ struct PairingEditorView: View {
 
       if let errorMessage {
         Section("Cannot save") {
-          Label(errorMessage, systemImage: "exclamationmark.triangle")
-            .foregroundStyle(.red)
+          Label(errorMessage, systemImage: StatusTone.failed.symbol)
+            .foregroundStyle(StatusTone.failed.color)
             .accessibilityIdentifier("pairing-validation-error")
         }
       }

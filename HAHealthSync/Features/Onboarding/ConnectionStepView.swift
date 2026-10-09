@@ -26,6 +26,18 @@ struct ConnectionStepView: View {
         }
       }
 
+      Section {
+        Link(
+          destination: URL(
+            string: "https://github.com/allhappy-labs/HAHealthSync/blob/main/SETUP.md")!
+        ) {
+          Label("Setup Instructions", systemImage: "book")
+        }
+        .accessibilityIdentifier("setup-instructions-link")
+      } footer: {
+        Text("How to install Health Bridge in Home Assistant and find each value below.")
+      }
+
       Section("Home Assistant") {
         TextField("Base URL", text: $draft.baseURL)
           .textContentType(.URL)
@@ -91,7 +103,7 @@ struct ConnectionStepView: View {
       } header: {
         Text("Home Assistant API")
       } footer: {
-        Text(saveFooter)
+        InfoFooter(saveFooterSummary, details: saveFooterDetails)
       }
 
       if let saveError {
@@ -167,27 +179,20 @@ struct ConnectionStepView: View {
     )
   }
 
-  private var saveFooter: String {
-    if mode == .settings {
-      return
-        "Leave a credential blank to keep its current Keychain value. Enter it only to replace or test it. The two credentials are never interchangeable."
-    }
-    return
-      "Both connection tests must succeed before continuing. Network, token, and webhook-secret failures are shown separately."
+  private var saveFooterSummary: String {
+    mode == .settings
+      ? "Leave a credential blank to keep its current Keychain value."
+      : "Both connection tests must succeed before continuing."
   }
 
-  @ViewBuilder
+  private var saveFooterDetails: String {
+    mode == .settings
+      ? "Enter it only to replace or test it. The two credentials are never interchangeable."
+      : "Network, token, and webhook-secret failures are shown separately."
+  }
+
   private var bottomAction: some View {
-    if #available(iOS 26.0, *) {
-      saveButton
-        .buttonStyle(.glassProminent)
-        .padding()
-    } else {
-      saveButton
-        .buttonStyle(.borderedProminent)
-        .padding()
-        .background(.bar)
-    }
+    saveButton.primaryActionBar()
   }
 
   private var saveButton: some View {
@@ -200,14 +205,15 @@ struct ConnectionStepView: View {
         isSaving = false
       }
     } label: {
-      if isSaving {
-        ProgressView()
-      } else {
-        Text(mode == .onboarding ? "Save and Continue" : "Save Connection")
+      Group {
+        if isSaving {
+          ProgressView()
+        } else {
+          Text(mode == .onboarding ? "Save and Continue" : "Save Connection")
+        }
       }
+      .frame(maxWidth: .infinity)
     }
-    .controlSize(.large)
-    .frame(maxWidth: .infinity)
     .disabled(!canSave || isSaving)
     .accessibilityIdentifier("save-connection")
   }

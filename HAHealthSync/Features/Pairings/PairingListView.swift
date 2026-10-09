@@ -11,13 +11,15 @@ struct PairingListView: View {
   var body: some View {
     List {
       Section {
-        Toggle("UV Exposure", isOn: $uvExposureToggleValue)
-          .disabled(model.isUpdatingUVExposureImport)
-          .accessibilityIdentifier("uv-exposure-import-toggle")
-          .onChange(of: uvExposureToggleValue) { _, enabled in
-            guard enabled != model.uvExposureImportEnabled else { return }
-            Task { await updateUVExposureImport(enabled) }
-          }
+        Toggle(isOn: $uvExposureToggleValue) {
+          TileLabel("UV Exposure", systemImage: "sun.max.fill", tint: .yellow)
+        }
+        .disabled(model.isUpdatingUVExposureImport)
+        .accessibilityIdentifier("uv-exposure-import-toggle")
+        .onChange(of: uvExposureToggleValue) { _, enabled in
+          guard enabled != model.uvExposureImportEnabled else { return }
+          Task { await updateUVExposureImport(enabled) }
+        }
 
         if model.isUpdatingUVExposureImport {
           HStack {
@@ -35,9 +37,9 @@ struct PairingListView: View {
         }
 
         if let uvPresetError {
-          Label(uvPresetError, systemImage: "exclamationmark.triangle")
+          Label(uvPresetError, systemImage: StatusTone.failed.symbol)
             .font(.footnote)
-            .foregroundStyle(.red)
+            .foregroundStyle(StatusTone.failed.color)
             .accessibilityIdentifier("uv-exposure-import-error")
         }
       } header: {
@@ -70,21 +72,6 @@ struct PairingListView: View {
             }
           }
         }
-      }
-
-      Section("Health permission") {
-        Button("Review Write Permissions") {
-          Task {
-            await model.requestHealthWriteAuthorization(
-              for: Set(model.pairings.map(\.destination))
-            )
-          }
-        }
-        .disabled(model.pairings.isEmpty)
-        .accessibilityIdentifier("review-health-write-permissions")
-        Text("Only destinations used by your pairings are requested.")
-          .font(.footnote)
-          .foregroundStyle(.secondary)
       }
     }
     .navigationTitle("Entity Pairings")
@@ -177,14 +164,18 @@ private struct PairingRow: View {
   let pairing: Pairing
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text(destinationName)
-      Text(pairing.entityID)
-        .font(.caption)
-        .foregroundStyle(.secondary)
-      Label(pairing.isEnabled ? "Enabled" : "Disabled", systemImage: statusSymbol)
-        .font(.caption)
-        .foregroundStyle(pairing.isEnabled ? .green : .secondary)
+    Label {
+      VStack(alignment: .leading, spacing: 4) {
+        Text(destinationName)
+        Text(pairing.entityID)
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Label(pairing.isEnabled ? "Enabled" : "Disabled", systemImage: statusSymbol)
+          .font(.caption)
+          .foregroundStyle(pairing.isEnabled ? StatusTone.synced.color : .secondary)
+      }
+    } icon: {
+      IconTile(systemImage: "arrow.down.heart.fill", tint: MetricCategory.vitals.tint)
     }
     .accessibilityElement(children: .combine)
   }

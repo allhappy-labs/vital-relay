@@ -19,10 +19,26 @@ struct DiagnosticsView: View {
       }
 
       Section {
-        Label("Server URLs", systemImage: "link")
-        Label("Entity IDs", systemImage: "tag")
-        Label("Credentials", systemImage: "key")
-        Label("Health values", systemImage: "heart.text.clipboard")
+        Label {
+          Text("Server URLs")
+        } icon: {
+          IconTile(systemImage: "link", tint: .gray)
+        }
+        Label {
+          Text("Entity IDs")
+        } icon: {
+          IconTile(systemImage: "tag.fill", tint: .gray)
+        }
+        Label {
+          Text("Credentials")
+        } icon: {
+          IconTile(systemImage: "key.fill", tint: .gray)
+        }
+        Label {
+          Text("Health values")
+        } icon: {
+          IconTile(systemImage: "heart.text.clipboard", tint: MetricCategory.vitals.tint)
+        }
       } header: {
         Text("Never Included")
       } footer: {
@@ -46,14 +62,22 @@ struct DiagnosticsView: View {
             Spacer()
           }
         }
+        .primaryActionStyle()
         .disabled(isPreparing)
         .accessibilityIdentifier("diagnostics-export")
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
       }
 
       if preparationFailed || model.currentError != nil {
         Section("Current Issue") {
-          Text(currentIssueDescription)
-            .foregroundStyle(.secondary)
+          Label {
+            Text(currentIssueDescription)
+              .foregroundStyle(.secondary)
+          } icon: {
+            Image(systemName: StatusTone.attention.symbol)
+              .foregroundStyle(StatusTone.attention.color)
+          }
         }
       }
     }

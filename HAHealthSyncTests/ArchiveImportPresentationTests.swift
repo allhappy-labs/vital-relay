@@ -79,6 +79,21 @@ final class ArchiveImportPresentationTests: XCTestCase {
     }
   }
 
+  func testTransportPauseExplainsRetryWithoutClaimingReconciliation() {
+    var report = ArchiveImportReport()
+    report.archiveState = .paused
+    report.archivedSamples = 20_330
+    report.failures = [.init(type: .activeEnergyBurned, category: .timeout)]
+
+    XCTAssertEqual(
+      ArchiveImportPresentation.archiveStatus(report),
+      "Paused; committed samples remain archived")
+    let guidance = ArchiveImportPresentation.recoveryGuidance(report.failures[0])
+    XCTAssertTrue(guidance?.contains("Active Calories") == true)
+    XCTAssertTrue(guidance?.contains("timeout") == true)
+    XCTAssertTrue(guidance?.contains("Resume Import") == true)
+  }
+
   func testIOS27V2DiscoversPerMetricDatesAndRoutesAllHistoryToArchive() async throws {
     let query = ArchivePresentationQuery(
       history: ArchiveHistoryDiscovery(
@@ -205,6 +220,142 @@ final class ArchiveImportPresentationTests: XCTestCase {
       HistoricalEligibleMetricsView.historyDescription(
         .noReadableSamples(authorizationBoundary: nil)),
       "No readable samples found")
+  }
+
+  private func progressReport(
+    phase: ArchiveImportPhase, state: ArchiveImportState = .importing, fraction: Double = 0.625
+  ) -> ArchiveImportReport {
+    var report = ArchiveImportReport()
+    report.archiveState = state
+    report.phase = phase
+    report.typeProgress = [
+      .stepCount: .init(
+        range: DateInterval(start: date, duration: 100), fraction: fraction, isComplete: false)
+    ]
+    return report
+  }
+
+  func testSummaryBeforeAnyImport() {
+    let summary = ArchiveProgressSummary.make(
+      report: nil, isRunning: false, selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(summary.headline, "Not started")
+    XCTAssertEqual(summary.caption, "Choose metrics below, then start.")
+    XCTAssertNil(summary.fraction)
+  }
+
+  func testSummaryWhileArchivingNamesTheType() {
+    let summary = ArchiveProgressSummary.make(
+      report: progressReport(phase: .archiving(.stepCount)), isRunning: true,
+      selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(summary.headline, "Archiving · 62%")
+    XCTAssertEqual(summary.caption, "Now: Steps")
+    XCTAssertEqual(summary.fraction, 0.625)
+  }
+
+  func testSummaryWhileCheckingForChanges() {
+    let summary = ArchiveProgressSummary.make(
+      report: progressReport(phase: .checking(.stepCount)), isRunning: true,
+      selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(summary.caption, "Checking Steps for changes")
+  }
+
+  func testSummaryCountsDownARateLimitWait() {
+    let report = progressReport(phase: .waiting(until: date.addingTimeInterval(39.2)))
+    let summary = ArchiveProgressSummary.make(
+      report: report, isRunning: true, selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(summary.headline, "Waiting for Home Assistant · resumes in 40 s")
+    XCTAssertEqual(
+      summary.caption, "Home Assistant limits uploads per minute. Nothing is lost.")
+  }
+
+  func testElapsedWaitSaysResumingNeverNegative() {
+    let report = progressReport(phase: .waiting(until: date.addingTimeInterval(-5)))
+    let summary = ArchiveProgressSummary.make(
+      report: report, isRunning: true, selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(summary.headline, "Waiting for Home Assistant · resuming…")
+  }
+
+  func testSummaryWithoutReadableTypesShowsNoPercentage() {
+    var report = ArchiveImportReport()
+    report.archiveState = .importing
+    report.phase = .preparing
+    report.typeProgress = [.stepCount: .init(range: nil, fraction: 0, isComplete: false)]
+    let summary = ArchiveProgressSummary.make(
+      report: report, isRunning: true, selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(summary.headline, "Archiving")
+    XCTAssertEqual(summary.caption, "Preparing…")
+    XCTAssertNil(summary.fraction)
+  }
+
+  func testDisplayedProgressNeverDropsWithinARun() {
+    let summary = ArchiveProgressSummary.make(
+      report: progressReport(phase: .archiving(.stepCount), fraction: 0.6), isRunning: true,
+      selected: [.steps], now: date, floor: 0.61)
+    XCTAssertEqual(summary.fraction, 0.61)
+    XCTAssertEqual(summary.headline, "Archiving · 61%")
+  }
+
+  func testPausedAndCompleteSummaries() {
+    let paused = ArchiveProgressSummary.make(
+      report: progressReport(phase: .idle, state: .paused), isRunning: false,
+      selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(paused.headline, "Paused · 62%")
+    let done = ArchiveProgressSummary.make(
+      report: progressReport(phase: .idle, state: .archived, fraction: 1), isRunning: false,
+      selected: [.steps], now: date, floor: nil)
+    XCTAssertEqual(done.headline, "Archive complete")
+    XCTAssertNil(done.caption)
+  }
+
+  func testFloorIgnoresTheLastRunsReportWhileANewRunStarts() {
+    let stale = progressReport(phase: .idle, state: .paused, fraction: 0.4)
+    XCTAssertNil(ArchiveProgressSummary.nextFloor(current: nil, report: stale, isRunning: true))
+  }
+
+  func testFloorRisesOnlyFromLiveProgress() {
+    let live = progressReport(phase: .archiving(.stepCount), fraction: 0.3)
+    XCTAssertEqual(
+      ArchiveProgressSummary.nextFloor(current: nil, report: live, isRunning: true), 0.3)
+    XCTAssertEqual(
+      ArchiveProgressSummary.nextFloor(current: 0.35, report: live, isRunning: true), 0.35)
+    XCTAssertEqual(
+      ArchiveProgressSummary.nextFloor(current: 0.35, report: live, isRunning: false), 0.35)
+  }
+
+  func testManyMetricsOfOneTypeCollapseToTheCategory() {
+    let sleep: Set<MetricID> = [.sleepDuration, .sleepREM, .sleepDeep, .sleepCore]
+    XCTAssertEqual(
+      ArchiveImportPresentation.typeName(.sleepAnalysis, selected: sleep), "Sleep (4 metrics)")
+  }
+
+  func testSharedTypeNameJoinsOnlySelectedMetrics() {
+    let name = ArchiveImportPresentation.typeName(
+      .sleepAnalysis, selected: [.sleepDuration, .sleepREM])
+    XCTAssertTrue(name.contains(MetricRegistry[.sleepREM]!.displayName))
+    XCTAssertTrue(name.contains(MetricRegistry[.sleepDuration]!.displayName))
+    XCTAssertFalse(name.contains(MetricRegistry[.sleepDeep]!.displayName))
+  }
+
+  func testRestartRestoresPerTypeProgress() async {
+    var checkpoint = ArchiveImportCheckpoint()
+    let earliest = Date().addingTimeInterval(-1000)
+    checkpoint.selection = ArchiveImportSelection(metrics: [.steps], requestedStart: nil)
+    checkpoint.metricEarliestDates = [.steps: earliest]
+    checkpoint.uploaderFingerprint = "0123456789ab"
+    checkpoint.ownerGeneration = 1
+    var type = ArchiveTypeCheckpoint()
+    type.coverage.insert(DateInterval(start: earliest, duration: 500))
+    // Paused mid-run: the rest of that run's window was still being scanned.
+    type.scanInterval = DateInterval(start: earliest.addingTimeInterval(500), duration: 500)
+    checkpoint.types[.stepCount] = type
+    let model = makeModel(
+      archiveCheckpointStore: InMemoryArchiveCheckpointStore(state: checkpoint),
+      supportsIOS27: true)
+
+    await model.refreshArchiveAvailability()
+
+    let fraction = model.lastArchiveReport?.typeProgress[.stepCount]?.fraction ?? 0
+    XCTAssertEqual(fraction, 0.5, accuracy: 0.01)
   }
 
   func testRestartRestoresCommittedProgressAndRequiresReconciliationBeforeResume() async {

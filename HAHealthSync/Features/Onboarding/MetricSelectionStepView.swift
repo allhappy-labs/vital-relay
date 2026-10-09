@@ -10,7 +10,7 @@ struct MetricSelectionStepView: View {
       Section {
         Text("Step 2 of 3")
           .font(.headline)
-          .foregroundStyle(.secondary)
+          .foregroundStyle(MetricCategory.vitals.tint)
       }
 
       MetricSelectionSections(
@@ -33,26 +33,17 @@ struct MetricSelectionStepView: View {
     }
   }
 
-  @ViewBuilder
   private var bottomAction: some View {
-    if #available(iOS 26.0, *) {
-      actionButton
-        .buttonStyle(.glassProminent)
-        .padding()
-    } else {
-      actionButton
-        .buttonStyle(.borderedProminent)
-        .padding()
-        .background(.bar)
-    }
+    actionButton.primaryActionBar()
   }
 
   private var actionButton: some View {
-    Button("Request Health Access", action: continueAction)
-      .controlSize(.large)
-      .frame(maxWidth: .infinity)
-      .disabled(selection.isEmpty)
-      .accessibilityIdentifier("request-health-access")
-      .accessibilityHint("Requests read access only for the selected health types")
+    Button(action: continueAction) {
+      Text("Request Health Access")
+        .frame(maxWidth: .infinity)
+    }
+    .disabled(selection.isEmpty)
+    .accessibilityIdentifier("request-health-access")
+    .accessibilityHint("Requests read access only for the selected health types")
   }
 }

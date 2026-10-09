@@ -16,6 +16,9 @@ struct RecentSyncEventsView: View {
         ForEach(Array(events.reversed().enumerated()), id: \.offset) { _, event in
           VStack(alignment: .leading, spacing: 4) {
             HStack {
+              Image(systemName: tone(for: event).symbol)
+                .foregroundStyle(tone(for: event).color)
+                .accessibilityHidden(true)
               Text(
                 event.outcome == .interrupted
                   ? "\(RecentSyncEventFormatter.triggerTitle(event.trigger)) · Interrupted"
@@ -40,6 +43,12 @@ struct RecentSyncEventsView: View {
     }
     .navigationTitle("Recent Sync Events")
     .accessibilityIdentifier("recent-sync-events-list")
+  }
+
+  private func tone(for event: SyncStatusEvent) -> StatusTone {
+    if event.outcome == .interrupted { return .attention }
+    if event.failureCategories.contains(.deviceLocked) { return .attention }
+    return event.failureCategories.isEmpty ? .synced : .failed
   }
 }
 

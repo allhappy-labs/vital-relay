@@ -128,6 +128,8 @@ final class OnboardingSmokeTests: XCTestCase {
     XCTAssertEqual(syncTitle.frame.midX, syncButton.frame.midX, accuracy: 1)
     XCTAssertTrue(app.staticTexts["Daily Steps"].waitForExistence(timeout: UITestWait.standard))
     XCTAssertTrue(app.staticTexts["246"].exists)
+    // VoiceOver hears the goal progress with the step count.
+    XCTAssertEqual(app.staticTexts["246"].value as? String, "2% of 10,000")
     XCTAssertTrue(app.staticTexts["Walking + Running Distance"].exists)
     XCTAssertTrue(
       app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "234 m"))

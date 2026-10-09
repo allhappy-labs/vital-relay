@@ -29,23 +29,41 @@ struct DestructiveActionReviewView: View {
     List {
       Section(presentation.removedHeading) {
         ForEach(presentation.removed, id: \.self) { item in
-          Label(item, systemImage: "xmark.circle")
+          Label {
+            Text(item)
+          } icon: {
+            Image(systemName: "xmark.circle.fill")
+              .foregroundStyle(StatusTone.failed.color)
+          }
         }
       }
       .accessibilityIdentifier(scopeIdentifier)
 
       Section(presentation.preservedHeading) {
         ForEach(presentation.preserved, id: \.self) { item in
-          Label(item, systemImage: "checkmark.circle")
+          Label {
+            Text(item)
+          } icon: {
+            Image(systemName: "checkmark.circle.fill")
+              .foregroundStyle(StatusTone.synced.color)
+          }
         }
       }
 
       Section {
-        Button(presentation.reviewButtonTitle, role: .destructive) {
+        Button(role: .destructive) {
           showReview = true
+        } label: {
+          Text(presentation.reviewButtonTitle)
+            .frame(maxWidth: .infinity)
         }
+        .buttonStyle(.borderedProminent)
+        .tint(.red)
+        .controlSize(.large)
         .disabled(model.isPerformingDestructiveAction)
         .accessibilityIdentifier(actionIdentifier)
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
       }
 
       if model.isPerformingDestructiveAction {

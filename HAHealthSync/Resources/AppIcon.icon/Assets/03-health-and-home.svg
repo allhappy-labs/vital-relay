@@ -1,32 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="heart-fill" x1="145" y1="390" x2="425" y2="760" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFB29A"/>
-      <stop offset="0.42" stop-color="#FF6D69"/>
-      <stop offset="1" stop-color="#FF385A"/>
+    <linearGradient id="heart-fill" x1="170" y1="361" x2="420" y2="663" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFAE97"/>
+      <stop offset="0.45" stop-color="#FF6A68"/>
+      <stop offset="1" stop-color="#FF3157"/>
     </linearGradient>
-    <linearGradient id="house-fill" x1="710" y1="345" x2="710" y2="750" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#55F4F3"/>
-      <stop offset="0.48" stop-color="#19CDEB"/>
-      <stop offset="1" stop-color="#087FC7"/>
-    </linearGradient>
-    <linearGradient id="house-highlight" x1="604" y1="420" x2="805" y2="658" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#E7FFFF" stop-opacity="0.62"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    <linearGradient id="house-fill" x1="724" y1="357" x2="724" y2="667" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6CF8F4"/>
+      <stop offset="0.5" stop-color="#1ACDEB"/>
+      <stop offset="1" stop-color="#0A8BD3"/>
     </linearGradient>
   </defs>
 
-  <g>
-    <path d="M292 789C230 742 83 641 83 500C83 369 235 322 292 429C350 322 502 369 502 500C502 641 354 742 292 789Z" fill="url(#heart-fill)"/>
-    <path d="M115 470C152 378 248 380 292 451C329 391 408 374 458 436C406 397 344 415 292 487C238 419 170 420 115 470Z" fill="#FFF1E8" opacity="0.30"/>
+  <g transform="translate(512 512) scale(1.06) translate(-512 -512)">
+    <path d="M290.85 656.44C208.72 598.01 135 533.06 135 455.83C135 399.66 177.13 361.04 226.28 361.04C261.38 361.04 285.96 382.11 300 411.95C314.04 382.11 338.62 361.04 373.72 361.04C422.87 361.04 465 399.66 465 455.83C465 533.06 391.28 598.01 309.15 656.44Q300 662.96 290.85 656.44Z" fill="url(#heart-fill)"/>
+    <path d="M173.9 434.29A52.66 52.66 0 0 1 208.25 398.73" fill="none" stroke="#FFF1E8" stroke-width="16" stroke-linecap="round" opacity="0.5"/>
 
-    <path d="M520 498L716 317L912 498V750H520V498Z" fill="url(#house-fill)"/>
-    <path d="M550 509L716 356L881 509V548L716 405L550 548Z" fill="url(#house-highlight)" opacity="0.48"/>
-    <path d="M552 498L716 348L880 498" fill="none" stroke="#85FFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.42"/>
-
-    <rect x="608" y="535" width="68" height="68" rx="12" fill="#FFF9E7"/>
-    <rect x="756" y="535" width="68" height="68" rx="12" fill="#FFF9E7"/>
-    <rect x="608" y="626" width="68" height="68" rx="12" fill="#FFF9E7"/>
-    <rect x="756" y="626" width="68" height="68" rx="12" fill="#FFF9E7"/>
+    <path d="M574 637L574 515Q574 485 596.82 465.53L698.14 379.07Q724 357 749.86 379.07L851.18 465.53Q874 485 874 515L874 637Q874 667 844 667L604 667Q574 667 574 637Z" fill="url(#house-fill)"/>
+    <path d="M608 500.68L724 401.7L840 500.68" fill="none" stroke="#C9FFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
+    <rect x="663" y="513" width="54" height="54" rx="10" fill="#FFF9EE"/>
+    <rect x="731" y="513" width="54" height="54" rx="10" fill="#FFF9EE"/>
+    <rect x="663" y="581" width="54" height="54" rx="10" fill="#FFF9EE"/>
+    <rect x="731" y="581" width="54" height="54" rx="10" fill="#FFF9EE"/>
   </g>
 </svg>

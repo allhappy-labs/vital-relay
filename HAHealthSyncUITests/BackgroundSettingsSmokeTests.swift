@@ -22,7 +22,10 @@ final class BackgroundSettingsSmokeTests: XCTestCase {
     app.buttons["Daily"].tap()
     XCTAssertTrue(picker.label.contains("Daily"))
     XCTAssertTrue(app.staticTexts["background-frequency-explanation"].exists)
+    // The fixture's system allows background refresh, so no blocker is shown.
+    XCTAssertFalse(app.descendants(matching: .any)["background-sync-blocker"].exists)
 
+    openSyncDetails(in: app)
     let registrations = app.buttons["background-metric-registrations"]
     XCTAssertTrue(scrollToExistence(registrations, in: app))
     registrations.tap()
@@ -64,6 +67,7 @@ final class BackgroundSettingsSmokeTests: XCTestCase {
     app.launch()
 
     openBackgroundSettings(in: app)
+    openSyncDetails(in: app)
     let recentEvents = app.buttons["background-recent-events"]
     XCTAssertTrue(scrollToExistence(recentEvents, in: app))
     recentEvents.tap()
@@ -98,11 +102,18 @@ final class BackgroundSettingsSmokeTests: XCTestCase {
 
     openBackgroundSettings(in: app)
 
+    let lastAutomatic = app.descendants(matching: .any)["background-system-last-automatic"]
+    XCTAssertTrue(scrollToExistence(lastAutomatic, in: app))
+    // System state is troubleshooting detail, one level down.
+    XCTAssertFalse(app.descendants(matching: .any)["background-system-refresh"].exists)
+    let guide = app.buttons["background-shortcuts-guide"]
+    XCTAssertTrue(guide.exists)
+
+    openSyncDetails(in: app)
     let refresh = app.descendants(matching: .any)["background-system-refresh"]
     XCTAssertTrue(scrollToExistence(refresh, in: app))
     XCTAssertTrue(app.descendants(matching: .any)["background-system-low-power"].exists)
     XCTAssertTrue(app.descendants(matching: .any)["background-system-earliest-next"].exists)
-    XCTAssertTrue(app.descendants(matching: .any)["background-system-last-automatic"].exists)
     let lastSweep = app.descendants(matching: .any)["background-system-last-sweep"]
     XCTAssertTrue(scrollToExistence(lastSweep, in: app))
     XCTAssertTrue(lastSweep.label.contains("Last full sweep"))
@@ -118,12 +129,20 @@ final class BackgroundSettingsSmokeTests: XCTestCase {
     XCTAssertTrue(scrollToExistence(toggle, in: app))
     XCTAssertEqual(toggle.value as? String, "0")
 
-    let guide = app.buttons["background-shortcuts-guide"]
+    app.navigationBars["Sync Details"].buttons.element(boundBy: 0).tap()
     XCTAssertTrue(scrollToExistence(guide, in: app))
     guide.tap()
     XCTAssertTrue(
       app.navigationBars["Sync with Shortcuts"].waitForExistence(timeout: UITestWait.standard))
     XCTAssertTrue(app.buttons["shortcuts-guide-open"].exists)
+  }
+
+  private func openSyncDetails(in app: XCUIApplication) {
+    let details = app.buttons["background-sync-details"]
+    XCTAssertTrue(scrollToExistence(details, in: app))
+    details.tap()
+    XCTAssertTrue(
+      app.navigationBars["Sync Details"].waitForExistence(timeout: UITestWait.standard))
   }
 
   private func openBackgroundSettings(in app: XCUIApplication) {

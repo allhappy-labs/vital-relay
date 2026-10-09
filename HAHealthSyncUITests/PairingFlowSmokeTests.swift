@@ -50,7 +50,13 @@ final class PairingFlowSmokeTests: XCTestCase {
 
     let row = app.buttons["pairing-sensor.body_mass"]
     XCTAssertTrue(row.waitForExistence(timeout: UITestWait.standard))
-    XCTAssertTrue(app.buttons["review-health-write-permissions"].isEnabled)
+    // Write permissions are reviewed once, from Import to Apple Health.
+    app.navigationBars["Entity Pairings"].buttons.element(boundBy: 0).tap()
+    let reviewWrite = app.buttons["import-review-write-permissions"]
+    XCTAssertTrue(reviewWrite.waitForExistence(timeout: UITestWait.standard))
+    XCTAssertTrue(reviewWrite.isEnabled)
+    app.buttons["health-import-pairings"].tap()
+    XCTAssertTrue(row.waitForExistence(timeout: UITestWait.standard))
 
     app.buttons["add-pairing"].tap()
     let duplicateEntity = app.textFields["pairing-entity-id"]

@@ -17,7 +17,7 @@ struct MedicationSelectionView: View {
           "On iOS 26 or newer, Apple shows a per-medication authorization sheet. Only medications you approve are read."
         )
         Text(
-          "Read-only: HA Health Sync cannot create medications or dose events. Authorized dose status is sent directly to your Home Assistant Health Bridge webhook."
+          "Read-only: Health Sync cannot create medications or dose events. Authorized dose status is sent directly to your Home Assistant Health Bridge webhook."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)
@@ -43,16 +43,24 @@ struct MedicationSelectionView: View {
               .foregroundStyle(.secondary)
           } else {
             ForEach(authorizedMedications, id: \.id) { medication in
-              Text(medication.name ?? "Authorized medication")
+              Label {
+                Text(medication.name ?? "Authorized medication")
+              } icon: {
+                IconTile(systemImage: "pill.fill", tint: MetricCategory.bodyMeasurements.tint)
+              }
             }
           }
         }
       }
 
       Section {
-        Toggle("Sync Authorized Medications", isOn: medicationSyncBinding)
-          .disabled(!didRequestAuthorization && !isEnabled)
-          .accessibilityIdentifier("medication-sync-toggle")
+        Toggle(isOn: medicationSyncBinding) {
+          TileLabel(
+            "Sync Authorized Medications", systemImage: "pills.fill",
+            tint: MetricCategory.bodyMeasurements.tint)
+        }
+        .disabled(!didRequestAuthorization && !isEnabled)
+        .accessibilityIdentifier("medication-sync-toggle")
       } footer: {
         Text(
           "Medication sync is independent from numeric metric selection and Home Assistant → Apple Health pairings."

@@ -44,6 +44,40 @@ struct ArchiveImportCoordinatorTests {
     #expect(await server.batches.count == count)
     #expect(try encoder.encode(await store.load()) == before)
   }
+
+  @Test func archiveRateLimitWaitsAndReplaysTheSameJournaledBatch() async throws {
+    let server = ArchiveServerFixture()
+    await server.rateLimitNextBatch(retryAfter: 0.01)
+    let store = InMemoryArchiveCheckpointStore()
+
+    let report = await makeCoordinator(server: server, store: store).importHistory(
+      selection: .init(metrics: [.steps]))
+
+    #expect(report.archiveState == .archived)
+    #expect(report.archivedSamples == 1)
+    let batches = await server.batches
+    #expect(batches.count == 2)
+    if batches.count == 2 { #expect(batches[0] == batches[1]) }
+    #expect(try await store.load().pending == nil)
+  }
+
+  @Test func pausingDuringArchiveRateLimitWaitPreservesPendingBatch() async throws {
+    let server = ArchiveServerFixture()
+    await server.rateLimitNextBatch(retryAfter: 30)
+    let store = InMemoryArchiveCheckpointStore()
+    let coordinator = makeCoordinator(server: server, store: store)
+    let running = Task { await coordinator.importHistory(selection: .init(metrics: [.steps])) }
+    let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+    while await server.batches.isEmpty && ContinuousClock.now < deadline { await Task.yield() }
+    #expect(await server.batches.count == 1)
+
+    await coordinator.pause()
+    let report = await running.value
+    #expect(report.archiveState == .paused)
+    #expect(report.failures.first?.category == .cancelled)
+    #expect(await server.batches.count == 1)
+    #expect(try await store.load().pending != nil)
+  }
   @Test func reapprovedSameCredentialCannotReplayOldGenerationPendingBatch() async throws {
     let server = ArchiveServerFixture()
     await server.setFailure(.connectionLost)
@@ -197,7 +231,8 @@ struct ArchiveImportCoordinatorTests {
     await query.deleteLastReadableSample()
     let report = await coordinator.resume()
     #expect(report.noReadableMetrics == [.steps])
-    #expect(report.failures.first?.issue == .noReadableSamples)
+    #expect(report.failures.isEmpty)
+    #expect(report.archiveState == .archived)
     #expect(
       await server.batches.flatMap(\.deletions).map(\.uuid) == [
         "00000000-0000-4000-8000-000000000001"
@@ -595,11 +630,102 @@ struct ArchiveImportCoordinatorTests {
     #expect(try await store.load().types[.stepCount]?.coverage.intervals == [query.interval])
   }
 
+  @Test func phasesRunFromPreparingThroughArchivingAndCheckingToIdle() async throws {
+    let recorder = ArchiveProgressRecorder()
+    let report = await makeCoordinator(progress: { await recorder.record($0) })
+      .importHistory(selection: .init(metrics: [.steps]))
+    let phases = await recorder.phases
+    #expect(phases.first == .preparing)
+    let archiving = try #require(phases.firstIndex(of: .archiving(.stepCount)))
+    let checking = try #require(phases.firstIndex(of: .checking(.stepCount)))
+    #expect(archiving < checking)
+    #expect(phases.last == .idle)
+    #expect(report.phase == .idle)
+    #expect(report.typeProgress[.stepCount]?.fraction == 1)
+    #expect(report.typeProgress[.stepCount]?.isComplete == true)
+  }
+
+  @Test func rateLimitWaitIsReportedWithItsResumeTime() async throws {
+    let server = ArchiveServerFixture()
+    await server.rateLimitNextBatch(retryAfter: 0.01)
+    let recorder = ArchiveProgressRecorder()
+    _ = await makeCoordinator(server: server, progress: { await recorder.record($0) })
+      .importHistory(selection: .init(metrics: [.steps]))
+    let phases = await recorder.phases
+    let waitIndex = try #require(
+      phases.firstIndex {
+        if case .waiting = $0 { return true }
+        return false
+      })
+    guard case .waiting(let until) = phases[waitIndex] else { return }
+    #expect(abs(until.timeIntervalSince1970 - 200.01) < 0.001)
+    #expect(phases[waitIndex + 1] == .archiving(.stepCount))
+  }
+
+  @Test func pauseDuringWaitEndsIdle() async throws {
+    let server = ArchiveServerFixture()
+    await server.rateLimitNextBatch(retryAfter: 30)
+    let recorder = ArchiveProgressRecorder()
+    let coordinator = makeCoordinator(server: server, progress: { await recorder.record($0) })
+    let run = Task { await coordinator.importHistory(selection: .init(metrics: [.steps])) }
+    var yields = 0
+    while await !recorder.phases.contains(where: {
+      if case .waiting = $0 { return true }
+      return false
+    }) {
+      yields += 1
+      try #require(yields < 100_000, "the import never reported a rate-limit wait")
+      await Task.yield()
+    }
+    await coordinator.pause()
+    let report = await run.value
+    #expect(report.phase == .idle)
+    #expect(await recorder.reports.last?.phase == .idle)
+  }
+
+  @Test func finishedTypeIsCompleteEvenThoughTheClockKeepsMoving() async throws {
+    let clock = ArchiveTickingClock()
+    let report = await makeCoordinator(now: { clock.next() })
+      .importHistory(selection: .init(metrics: [.steps]))
+    #expect(report.archiveState == .archived)
+    #expect(report.typeProgress[.stepCount]?.fraction == 1)
+    #expect(report.typeProgress[.stepCount]?.isComplete == true)
+  }
+
+  @Test func resumedImportReportsEarlierProgressFirst() async throws {
+    var state = ArchiveImportCheckpoint()
+    state.uploaderFingerprint = "0123456789ab"
+    state.ownerGeneration = 1
+    state.selection = .init(metrics: [.steps])
+    state.metricEarliestDates = [.steps: Date(timeIntervalSince1970: 100)]
+    var steps = ArchiveTypeCheckpoint()
+    steps.coverage.insert(
+      DateInterval(
+        start: Date(timeIntervalSince1970: 100), end: Date(timeIntervalSince1970: 150)))
+    steps.scanInterval = DateInterval(
+      start: Date(timeIntervalSince1970: 150), end: Date(timeIntervalSince1970: 200))
+    state.types[.stepCount] = steps
+    state.archivedSamples = 7
+    let recorder = ArchiveProgressRecorder()
+    let report = await makeCoordinator(
+      store: InMemoryArchiveCheckpointStore(state: state),
+      progress: { await recorder.record($0) }
+    ).importHistory(selection: .init(metrics: [.steps]))
+    // The very first emission already shows the saved progress; nothing flickers to empty.
+    let first = await recorder.reports.first
+    #expect(first?.phase == .preparing)
+    #expect(first?.typeProgress[.stepCount]?.fraction == 0.5)
+    #expect(first?.archivedSamples == 7)
+    #expect(report.typeProgress[.stepCount]?.fraction == 1)
+  }
+
   private func makeCoordinator(
     query: ArchiveQueryFixture = ArchiveQueryFixture(),
     server: ArchiveServerFixture = ArchiveServerFixture(),
     store: any ArchiveCheckpointStore = InMemoryArchiveCheckpointStore(),
-    access: any PaidFeatureAccessing = ImportPaidAccessFixture()
+    access: any PaidFeatureAccessing = ImportPaidAccessFixture(),
+    now: @escaping @Sendable () -> Date = { Date(timeIntervalSince1970: 200) },
+    progress: @escaping @Sendable (ArchiveImportReport) async -> Void = { _ in }
   ) -> ArchiveImportCoordinator {
     ArchiveImportCoordinator(
       access: access,
@@ -612,7 +738,7 @@ struct ArchiveImportCoordinatorTests {
           capability: try await server.capability(),
           sender: server, statusFetcher: server,
           uploaderFingerprint: "0123456789ab")
-      }, now: { Date(timeIntervalSince1970: 200) })
+      }, now: now, progress: progress)
   }
 }
 
@@ -787,8 +913,10 @@ private actor ArchiveServerFixture: ArchiveBatchSending, ArchiveStatusFetching {
   var shouldSuspend = false
   var isSendSuspended = false
   var sendWasCancelled = false
+  var nextRateLimitDelay: TimeInterval?
   var sendContinuation: CheckedContinuation<Void, Never>?
   func suspendSend() { shouldSuspend = true }
+  func rateLimitNextBatch(retryAfter: TimeInterval) { nextRateLimitDelay = retryAfter }
   func markSendCancelled() { sendWasCancelled = true }
   func releaseSend() {
     sendContinuation?.resume()
@@ -819,6 +947,10 @@ private actor ArchiveServerFixture: ArchiveBatchSending, ArchiveStatusFetching {
   {
     batches.append(batch)
     if let ownerError { throw ownerError }
+    if let nextRateLimitDelay {
+      self.nextRateLimitDelay = nil
+      throw NetworkFailure.rateLimited(retryAfter: nextRateLimitDelay)
+    }
     if shouldSuspend {
       shouldSuspend = false
       await withTaskCancellationHandler {
@@ -866,4 +998,27 @@ private actor InterruptingArchiveStore: ArchiveCheckpointStore {
     state = value
   }
   func reset() { state = ArchiveImportCheckpoint() }
+}
+
+private actor ArchiveProgressRecorder {
+  var reports: [ArchiveImportReport] = []
+  func record(_ report: ArchiveImportReport) { reports.append(report) }
+  /// Phases with consecutive duplicates removed.
+  var phases: [ArchiveImportPhase] {
+    reports.map(\.phase).reduce(into: []) { result, phase in
+      if result.last != phase { result.append(phase) }
+    }
+  }
+}
+
+/// A clock that advances 1 ms on every read, like a real one during an import.
+private final class ArchiveTickingClock: @unchecked Sendable {
+  private let lock = NSLock()
+  private var seconds = 200.0
+  func next() -> Date {
+    lock.lock()
+    defer { lock.unlock() }
+    seconds += 0.001
+    return Date(timeIntervalSince1970: seconds)
+  }
 }

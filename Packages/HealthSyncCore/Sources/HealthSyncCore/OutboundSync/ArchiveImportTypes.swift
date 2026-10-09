@@ -36,6 +36,33 @@ public struct ArchiveImportFailure: Sendable, Equatable {
   }
 }
 
+/// What the import is doing now. Published through the progress callback; never persisted.
+public enum ArchiveImportPhase: Sendable, Equatable {
+  case idle
+  /// Connection, capability and HealthKit discovery.
+  case preparing
+  /// Bounded interval scan and upload of one source type.
+  case archiving(HealthObjectTypeID)
+  /// Anchored reconciliation and inventory comparison of one source type.
+  case checking(HealthObjectTypeID)
+  /// Home Assistant asked for a pause (Retry-After). Resumes automatically.
+  case waiting(until: Date)
+}
+
+/// Time-based progress of one source type: how much of its readable range Home Assistant has
+/// acknowledged. Sample totals are deliberately not counted; that would need a full HealthKit pass.
+public struct ArchiveTypeProgress: Sendable, Equatable {
+  /// Nil when none of the type's selected metrics has a readable sample.
+  public var range: DateInterval?
+  public var fraction: Double
+  public var isComplete: Bool
+  public init(range: DateInterval?, fraction: Double, isComplete: Bool) {
+    self.range = range
+    self.fraction = fraction
+    self.isComplete = isComplete
+  }
+}
+
 public struct ArchiveImportReport: Sendable, Equatable {
   public var archiveState: ArchiveImportState = .idle
   public var archivedSamples = 0
@@ -44,6 +71,13 @@ public struct ArchiveImportReport: Sendable, Equatable {
   public var noReadableMetrics: Set<MetricID> = []
   public var projectionStates: [MetricID: ArchiveProjectionState] = [:]
   public var failures: [ArchiveImportFailure] = []
+  public var phase: ArchiveImportPhase = .idle
+  public var typeProgress: [HealthObjectTypeID: ArchiveTypeProgress] = [:]
+  /// Mean of per-type fractions over types with readable history; nil when there are none.
+  public var overallFraction: Double? {
+    let readable = typeProgress.values.filter { $0.range != nil }.map(\.fraction)
+    return readable.isEmpty ? nil : readable.reduce(0, +) / Double(readable.count)
+  }
   public init() {}
 }
 

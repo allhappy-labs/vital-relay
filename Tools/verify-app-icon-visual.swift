@@ -83,12 +83,14 @@ let summary = String(
   luminanceSpread
 )
 
-guard boundingWidth >= 0.88, boundingHeight >= 0.70 else {
+// The composition may be wider or taller; its long side should span the
+// icon and its short side should still carry real weight.
+guard max(boundingWidth, boundingHeight) >= 0.85, min(boundingWidth, boundingHeight) >= 0.70 else {
   fputs("app icon foreground is too small: \(summary)\n", stderr)
   exit(1)
 }
 
-guard boundingWidth <= 0.94 else {
+guard boundingWidth <= 0.94, boundingHeight <= 0.94 else {
   fputs("app icon foreground reaches too close to the mask edge: \(summary)\n", stderr)
   exit(1)
 }

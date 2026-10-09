@@ -383,6 +383,7 @@ final class AppModel {
         restored.archivedSamples = checkpoint.archivedSamples
         restored.archivedDeletions = checkpoint.archivedDeletions
         restored.metricEarliestDates = checkpoint.metricEarliestDates
+        restored.typeProgress = ArchiveProgress.restored(checkpoint: checkpoint, now: Date())
         restored.failures = checkpoint.types.compactMap { type, state in
           state.reconciliationRequired
             ? ArchiveImportFailure(type: type, category: .healthKit, issue: .reconciliationRequired)

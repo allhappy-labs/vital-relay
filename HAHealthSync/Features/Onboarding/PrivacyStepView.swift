@@ -1,3 +1,4 @@
+import HealthSyncCore
 import SwiftUI
 
 struct PrivacyStepView: View {
@@ -11,49 +12,53 @@ struct PrivacyStepView: View {
           .foregroundStyle(.secondary)
 
         Image(systemName: "heart.text.clipboard")
-          .font(.system(size: 52))
-          .foregroundStyle(.tint)
+          .font(.system(size: 56))
+          .foregroundStyle(MetricCategory.vitals.tint.gradient)
           .accessibilityHidden(true)
 
         Text("Your health data stays under your control")
           .font(.largeTitle.bold())
 
         Text(
-          "HA Health Sync processes data on this iPhone and sends it directly to your own Home Assistant instance. There are no accounts, analytics, advertisements, cloud storage, or external servers."
+          "Health Sync processes data on this iPhone and sends it directly to your own Home Assistant instance. There are no accounts, analytics, advertisements, cloud storage, or external servers."
         )
 
-        Label("Credentials are stored in the iOS Keychain", systemImage: "key.fill")
-        Label("Only health types you select are requested", systemImage: "checkmark.shield.fill")
-        Label("Health values are excluded from app logs", systemImage: "eye.slash.fill")
+        Label {
+          Text("Credentials are stored in the iOS Keychain")
+        } icon: {
+          IconTile(systemImage: "key.fill", tint: .gray)
+        }
+        Label {
+          Text("Only health types you select are requested")
+        } icon: {
+          IconTile(systemImage: "checkmark.shield.fill", tint: .green)
+        }
+        Label {
+          Text("Health values are excluded from app logs")
+        } icon: {
+          IconTile(systemImage: "eye.slash.fill", tint: .blue)
+        }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
       .padding()
     }
+    .background(Color(uiColor: .systemGroupedBackground))
     .safeAreaInset(edge: .bottom) {
       bottomAction
     }
     .navigationTitle("Privacy")
   }
 
-  @ViewBuilder
   private var bottomAction: some View {
-    if #available(iOS 26.0, *) {
-      actionButton
-        .buttonStyle(.glassProminent)
-        .padding()
-    } else {
-      actionButton
-        .buttonStyle(.borderedProminent)
-        .padding()
-        .background(.bar)
-    }
+    actionButton.primaryActionBar()
   }
 
   private var actionButton: some View {
-    Button("Continue", action: continueAction)
-      .controlSize(.large)
-      .frame(maxWidth: .infinity)
-      .accessibilityIdentifier("privacy-continue")
-      .accessibilityHint("Continues to Apple Health metric selection")
+    Button(action: continueAction) {
+      Text("Continue")
+        .frame(maxWidth: .infinity)
+    }
+    .accessibilityIdentifier("privacy-continue")
+    .accessibilityHint("Continues to Apple Health metric selection")
   }
 }
