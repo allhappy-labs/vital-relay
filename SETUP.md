@@ -1,6 +1,6 @@
-# Set up Health Sync
+# Set up Vital Relay
 
-Health Sync sends the Apple Health data you choose from your iPhone straight to your own Home Assistant. There is no account and no cloud service in between. Setup takes about ten minutes and has two parts: prepare Home Assistant, then connect the app.
+Vital Relay sends the Apple Health data you choose from your iPhone straight to your own Home Assistant. There is no account and no cloud service in between. Setup takes about ten minutes and has two parts: prepare Home Assistant, then connect the app.
 
 You will need:
 
@@ -10,7 +10,7 @@ You will need:
 
 ## 1. Install Health Bridge in Home Assistant
 
-Health Sync talks to Home Assistant through the Health Bridge integration. The [allhappy-labs fork](https://github.com/allhappy-labs/Health_Bridge) adds full-history archive import; the original [Health Bridge](https://github.com/gregt1993/Health_Bridge) supports live sync only.
+Vital Relay talks to Home Assistant through the Health Bridge integration. The [allhappy-labs fork](https://github.com/allhappy-labs/Health_Bridge) adds full-history archive import; the original [Health Bridge](https://github.com/gregt1993/Health_Bridge) supports live sync only.
 
 1. Back up Home Assistant (**Settings → System → Backups**).
 2. In HACS, open **⋮ → Custom repositories**, add `https://github.com/allhappy-labs/Health_Bridge` with type **Integration**, then open it and choose **Download**.
@@ -29,13 +29,13 @@ If you already have a Health Assistant Link entry, keep it and reuse its token. 
 ## 3. Create a long-lived access token
 
 1. In Home Assistant, open your profile (your name in the sidebar) → **Security**.
-2. Under **Long-lived access tokens**, choose **Create token**, name it `Health Sync`, and copy it. Home Assistant shows it only once.
+2. Under **Long-lived access tokens**, choose **Create token**, name it `Vital Relay`, and copy it. Home Assistant shows it only once.
 
 The webhook secret and the access token are different credentials and are never interchangeable. The app stores both in the iPhone Keychain.
 
 ## 4. Connect the app
 
-Open Health Sync and follow the three onboarding steps:
+Open Vital Relay and follow the three onboarding steps:
 
 1. **Privacy** — read what the app does with your data.
 2. **Metrics** — choose the Apple Health data to send, then allow read access when iOS asks. You can change this later.

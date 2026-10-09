@@ -507,7 +507,7 @@ An action conforms to `AppIntent`, returns a result indicating success/failure, 
 
 Implementation consequence: `SyncHealthWithHomeAssistantIntent` should call the same actor-isolated coordinator as foreground/background sync and return only privacy-safe summary text. App Intent availability does not override HealthKit authorization, protected-data, network, or iOS background-execution limits.
 
-## Compatibility decisions for HA Health Sync
+## Compatibility decisions for Vital Relay
 
 1. Pin fixtures and acknowledgement validators to live protocol 1/backfill protocol 1, but decode additive response fields permissively.
 2. Generate request IDs from a safe prefix plus UUID/timestamp characters and cap at 64 characters.

@@ -57,7 +57,7 @@ export default function Home() {
               <span className="gradient-text">Your home.</span>
             </h1>
             <p className="mt-7 max-w-2xl text-pretty text-lg leading-8 text-slate-300 sm:text-xl">
-              HA Health Sync connects selected Apple Health data directly with
+              Vital Relay connects selected Apple Health data directly with
               the Home Assistant you control—without a developer cloud in the
               middle.
             </p>
@@ -106,7 +106,7 @@ export default function Home() {
             <div className="icon-stage">
               <div className="icon-stage-ring" aria-hidden="true" />
               <Image
-                alt="HA Health Sync app icon, showing Apple Health and Home Assistant connected by two arrows"
+                alt="Vital Relay app icon, showing Apple Health and Home Assistant connected by two arrows"
                 className="relative size-full rounded-[28%] shadow-2xl shadow-black/40"
                 height="1024"
                 priority

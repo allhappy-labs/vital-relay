@@ -11,15 +11,15 @@ import {
 import { SupportCard } from '@/components/support-card';
 
 export const metadata: Metadata = {
-  title: 'Support — HA Health Sync',
+  title: 'Support — Vital Relay',
   description:
-    'Setup, connection, Health permission, background synchronization, and local-data guidance for HA Health Sync.',
+    'Setup, connection, Health permission, background synchronization, and local-data guidance for Vital Relay.',
   alternates: { canonical: '/support' },
   openGraph: {
     url: '/support',
-    title: 'Support — HA Health Sync',
+    title: 'Support — Vital Relay',
     description:
-      'Setup, connection, Health permission, background synchronization, and local-data guidance for HA Health Sync.',
+      'Setup, connection, Health permission, background synchronization, and local-data guidance for Vital Relay.',
   },
 };
 
@@ -42,7 +42,7 @@ const supportTopics = [
   {
     icon: <ShieldCheck aria-hidden="true" />,
     title: 'Health permissions',
-    copy: 'Open Apple Health or iOS Settings to review access. HA Health Sync cannot infer a denied read permission from an empty result, and it requests only the types you select.',
+    copy: 'Open Apple Health or iOS Settings to review access. Vital Relay cannot infer a denied read permission from an empty result, and it requests only the types you select.',
   },
   {
     icon: <RefreshCw aria-hidden="true" />,
@@ -64,7 +64,7 @@ export default function SupportPage() {
           <p className="eyebrow">Help without sharing private data</p>
           <h1 className="section-title mt-4">Support</h1>
           <p className="section-copy">
-            HA Health Sync requires an iPhone with iOS 18 or later, your own
+            Vital Relay requires an iPhone with iOS 18 or later, your own
             Home Assistant, and the Health Bridge integration. Start with the
             focused checks below.
           </p>

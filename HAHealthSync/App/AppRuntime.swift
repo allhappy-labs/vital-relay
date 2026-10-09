@@ -489,7 +489,7 @@ enum AppRuntime {
 @Observable
 private final class UITestLifetimeUnlock: LifetimeUnlockPresenting {
   var state: PaidAccessState = .locked
-  let displayPrice: String? = "CHF 9.00"
+  let displayPrice: String? = "$10.00"
 
   func load() async {}
 

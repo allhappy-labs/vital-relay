@@ -59,7 +59,7 @@ struct DestructiveActionPresentation {
     reviewButtonTitle: "Review Delete",
     stageOneTitle: "Review complete local deletion",
     stageOneMessage:
-      "All Health Sync configuration and credentials on this iPhone will be removed.",
+      "All Vital Relay configuration and credentials on this iPhone will be removed.",
     confirmationTitle: "Delete All Local App Data",
     confirmationMessage:
       "This removes the iPhone's archive uploader credential. An administrator must approve a new uploader or transfer before archive import can resume. The Home Assistant health archive remains; delete it separately as an administrator in the Health Bridge archive card."

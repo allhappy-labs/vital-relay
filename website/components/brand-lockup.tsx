@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 export function BrandLockup({ compact = false }: { compact?: boolean }) {
   return (
     <Link
-      aria-label="HA Health Sync home"
+      aria-label="Vital Relay home"
       className="group inline-flex items-center gap-3 no-underline"
       href="/"
     >
@@ -27,7 +27,7 @@ export function BrandLockup({ compact = false }: { compact?: boolean }) {
           compact ? 'text-sm' : 'text-base',
         )}
       >
-        HA Health Sync
+        Vital Relay
       </span>
     </Link>
   );

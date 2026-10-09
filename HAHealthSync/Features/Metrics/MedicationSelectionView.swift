@@ -17,7 +17,7 @@ struct MedicationSelectionView: View {
           "On iOS 26 or newer, Apple shows a per-medication authorization sheet. Only medications you approve are read."
         )
         Text(
-          "Read-only: Health Sync cannot create medications or dose events. Authorized dose status is sent directly to your Home Assistant Health Bridge webhook."
+          "Read-only: Vital Relay cannot create medications or dose events. Authorized dose status is sent directly to your Home Assistant Health Bridge webhook."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)

@@ -1,6 +1,6 @@
 # Privacy and security model
 
-HA Health Sync has no account system, analytics, advertising, remote logging, external backend, cloud database, or third-party dependency. Health data travels directly between Apple Health on the iPhone and the Home Assistant base URL chosen by the user.
+Vital Relay has no account system, analytics, advertising, remote logging, external backend, cloud database, or third-party dependency. Health data travels directly between Apple Health on the iPhone and the Home Assistant base URL chosen by the user.
 
 ## Data flow
 

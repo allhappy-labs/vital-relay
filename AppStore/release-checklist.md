@@ -51,7 +51,9 @@ Pending Cloudflare records (DNS only; proxying should remain disabled until Site
 - [ ] Upload the archive only after explicit authorization.
 - [ ] Wait for build processing and select build `1` for version `1.0.0`.
 
-## Full-history archive release gate (development branch)
+## Full-history archive release gate
+
+Decided 9 Oct 2026: historical import (including the iOS 27 original-sample archive) ships in 1.0.0, so every item below blocks submission.
 
 - [ ] Revalidate the privacy policy, App Privacy answers, review instructions, and screenshots against the exact binary if the iOS 27 archive feature is included. It creates a long-lived Home Assistant copy of original samples, while local reset and permission revocation do not erase it.
 - [ ] Decide one authoritative uploader per Health Bridge user and test any intended multi-device ownership before claiming it is safe.
@@ -73,7 +75,8 @@ The 31 August 2026 evidence below is historical and predates archive work. The c
 ## Product page
 
 - [x] English listing name, subtitle, description, keywords, categories, URLs, and copyright are drafted and locally validated.
-- [ ] Confirm the app name is available in App Store Connect.
+- [x] Choose the app name: **Vital Relay** (display name, listing, in-app copy, website). "Health Sync" was rejected because "Health Sync by appyhapps" already exists; "Home Assistant" stays out of the name for trademark reasons and appears only descriptively in the subtitle.
+- [ ] Confirm "Vital Relay" is available when reserving the name in App Store Connect (a US App Store search found no app with that name on 9 Oct 2026; App Store Connect checks globally).
 - [ ] Enter the verified English metadata and review the rendered product page.
 - [ ] Complete age-rating questions.
 - [ ] Complete the regulated-medical-device declaration accurately; the app must not be represented as medical diagnosis or treatment software.
@@ -81,18 +84,18 @@ The 31 August 2026 evidence below is historical and predates archive work. The c
 
 ## Screenshots
 
-- [ ] Capture 1–10 portrait PNG or JPEG screenshots at exactly 1290×2796 pixels for the 6.9-inch iPhone display class.
-- [ ] Use only synthetic data and a non-private Home Assistant test environment.
-- [ ] Cover onboarding/direct-data-flow context, dashboard status, metric selection, import pairing, and privacy/local-data controls as useful.
-- [ ] Exclude credentials, tokens, webhook secrets, URLs, entity identifiers, personal health readings, notification content, and device-owner details.
+- [x] Capture 1–10 portrait PNG screenshots for the 6.9-inch iPhone class: six in `AppStore/screenshots/iphone-6.9/` at 1320×2868, no alpha. Captured at 1206×2622 on the shared iPhone 17 Pro simulator by `AppStoreScreenshotTests` (skipped unless `SCREENSHOT_DIR` is set), then scaled with `sips -z 2868 1320` (0.06% aspect change).
+- [x] Use only synthetic data: UI-testing fixtures with in-memory stores and fake Home Assistant responses, en_US locale, 9:41 status-bar override.
+- [x] Cover dashboard, privacy onboarding, metric selection, background sync, historical import, and lifetime unlock ($10.00 fixture price).
+- [x] Exclude credentials, tokens, webhook secrets, URLs, entity identifiers, personal health readings, notification content, and device-owner details (visually inspected).
 - [ ] Check legibility, localization, status-bar content, and final pixel dimensions before upload.
 
 ## Review access
 
 - [x] Reviewer guidance explains prerequisites, selected permissions, direct data flow, synthetic simulator data, background limitations, and deletion.
 - [x] No demo account, server URL, access token, or webhook secret is committed.
-- [ ] Decide whether Apple Review needs a dedicated reachable Home Assistant plus Health Bridge environment.
-- [ ] If required, create a least-privilege review environment and enter its access details only in private App Review fields.
+- [x] Decided (9 Oct 2026): no live review server. The owner's Home Assistant is not offered; Apple Review gets a physical-device demo video instead (see `review-notes.md`).
+- [ ] Record the demo video (onboarding, Health permission, Sync Now, values in Home Assistant, purchase/restore, background settings, historical import progress) and attach or link it in App Review notes.
 - [ ] Test the complete review instructions from a clean device or simulator.
 
 ## Compliance

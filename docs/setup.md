@@ -10,7 +10,7 @@
 
 ## Credentials
 
-HA Health Sync deliberately uses two credentials that are not interchangeable:
+Vital Relay deliberately uses two credentials that are not interchangeable:
 
 1. **Health Bridge webhook secret** — the secret entered while configuring the Health Bridge integration. It is sent only inside requests to `/api/webhook/health_bridge`.
 2. **Home Assistant long-lived access token** — generated from the Home Assistant user profile. It is sent only as `Authorization: Bearer <token>` to authenticated Home Assistant REST endpoints.
@@ -46,7 +46,7 @@ The initial registry contains 34 selectable Health Bridge metrics:
 
 The Health Bridge identifiers containing `*_hours` are historical names: the app deliberately sends sleep durations in seconds because the integration performs the seconds-to-hours conversion. Percentages are fractions from 0 through 1, not values from 0 through 100.
 
-Daily totals use the device calendar's local-midnight boundaries. The next boundary is calculated by adding one calendar day, so daylight-saving days can correctly span 23 or 25 hours. Duplicate HealthKit sample UUIDs are removed. Samples from all HealthKit sources, including user-entered samples, participate unless they were written by HA Health Sync itself; excluding this app's source prevents an imported Home Assistant value from being immediately exported back.
+Daily totals use the device calendar's local-midnight boundaries. The next boundary is calculated by adding one calendar day, so daylight-saving days can correctly span 23 or 25 hours. Duplicate HealthKit sample UUIDs are removed. Samples from all HealthKit sources, including user-entered samples, participate unless they were written by Vital Relay itself; excluding this app's source prevents an imported Home Assistant value from being immediately exported back.
 
 Overlapping sleep and mindful intervals are unioned before their duration is calculated. Detailed sleep stages are mapped explicitly rather than forwarding Apple's enum raw values. The workout metric sends only the latest workout and omits unavailable optional statistics.
 
@@ -103,7 +103,7 @@ An incompatible recorder or schema disables only the protocol-1 historical-impor
 
 ## Medications on iOS 26 or newer
 
-Settings → Medications presents Apple's per-object authorization flow. HA Health Sync reads only approved medication concepts and their dose events. It cannot create medications or dose events, and medication is never offered as a Home Assistant → Apple Health destination. Authorized names are displayed only while the medication screen is open and are then discarded; protected checkpoints contain opaque app-derived identifiers and the HealthKit anchor, not names or dose values.
+Settings → Medications presents Apple's per-object authorization flow. Vital Relay reads only approved medication concepts and their dose events. It cannot create medications or dose events, and medication is never offered as a Home Assistant → Apple Health destination. Authorized names are displayed only while the medication screen is open and are then discarded; protected checkpoints contain opaque app-derived identifiers and the HealthKit anchor, not names or dose values.
 
 ## Diagnostics and local data
 

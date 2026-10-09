@@ -5,7 +5,7 @@ import { SiteHeader } from '@/components/site-header';
 
 import './globals.css';
 
-const title = 'HA Health Sync — Apple Health and Home Assistant';
+const title = 'Vital Relay — Apple Health and Home Assistant';
 const description =
   'Private, direct synchronization between Apple Health and your Home Assistant.';
 
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     url: '/',
     title,
     description,
-    siteName: 'HA Health Sync',
+    siteName: 'Vital Relay',
     images: [
       {
         url: '/og.png',
         width: 1200,
         height: 630,
-        alt: 'HA Health Sync connects Apple Health and Home Assistant',
+        alt: 'Vital Relay connects Apple Health and Home Assistant',
       },
     ],
   },

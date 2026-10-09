@@ -102,7 +102,7 @@ struct BackgroundSyncSettingsView: View {
         InfoFooter(
           "iOS decides when background sync runs.",
           details:
-            "Apple Health can't be read while iPhone is locked; sync catches up after you unlock. If you swipe Health Sync away in the app switcher, iOS stops background sync until you open it again."
+            "Apple Health can't be read while iPhone is locked; sync catches up after you unlock. If you swipe Vital Relay away in the app switcher, iOS stops background sync until you open it again."
         )
       }
     }

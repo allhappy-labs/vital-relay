@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Health Sync</string>
+	<string>Vital Relay</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -53,11 +53,11 @@
 		</dict>
 	</dict>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Health Sync reads only the health data you select and sends it directly to your Home Assistant. Optional original-sample import stores a durable copy in your Home Assistant archive.</string>
+	<string>Vital Relay reads only the health data you select and sends it directly to your Home Assistant. Optional original-sample import stores a durable copy in your Home Assistant archive.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Health Sync writes only configured Home Assistant values to Apple Health.</string>
+	<string>Vital Relay writes only configured Home Assistant values to Apple Health.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Health Sync connects directly to your Home Assistant on your local network.</string>
+	<string>Vital Relay connects directly to your Home Assistant on your local network.</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -10,7 +10,7 @@ Remote HTTP is never accepted. Plain HTTP must use a loopback, link-local, RFC19
 
 ## Sync reports no applied metrics
 
-A successful HTTP status is insufficient. HA Health Sync requires Health Bridge to return `ok: true`, `applied: true`, the matching request ID and live protocol, and a positive updated-entity count. Confirm that a metric has authorized HealthKit data in its current window and that Health Bridge is current. On an initial synchronization, an anchored query can contain old changes while the metric's current window contains no value; the app commits that initial anchor and safely skips the metric so the same historical changes do not cause a permanent compatibility failure. A final deleted latest-value sample after an anchor was already committed cannot clear a live sensor because the protocol has no deletion sentinel; reset/reconcile deliberately rather than sending an invented value.
+A successful HTTP status is insufficient. Vital Relay requires Health Bridge to return `ok: true`, `applied: true`, the matching request ID and live protocol, and a positive updated-entity count. Confirm that a metric has authorized HealthKit data in its current window and that Health Bridge is current. On an initial synchronization, an anchored query can contain old changes while the metric's current window contains no value; the app commits that initial anchor and safely skips the metric so the same historical changes do not cause a permanent compatibility failure. A final deleted latest-value sample after an anchor was already committed cannot clear a live sensor because the protocol has no deletion sentinel; reset/reconcile deliberately rather than sending an invented value.
 
 ## Background sync did not run at a specific time
 

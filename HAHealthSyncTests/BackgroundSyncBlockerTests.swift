@@ -10,7 +10,7 @@ final class BackgroundSyncBlockerTests: XCTestCase {
 
   func testRefreshOffOffersSettings() {
     let blocker = BackgroundSyncBlocker.current(refresh: .denied, isLowPowerModeEnabled: false)
-    XCTAssertEqual(blocker?.message, "Background App Refresh is off for Health Sync.")
+    XCTAssertEqual(blocker?.message, "Background App Refresh is off for Vital Relay.")
     XCTAssertEqual(blocker?.offersSettings, true)
   }
 

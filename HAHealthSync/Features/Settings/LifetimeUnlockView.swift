@@ -58,7 +58,7 @@ struct LifetimeUnlockView: View {
   var body: some View {
     NavigationStack {
       List {
-        Section("Free with Health Sync") {
+        Section("Free with Vital Relay") {
           ForEach(presentation.freeFeatures, id: \.self) { feature in
             Label {
               Text(feature)

@@ -4,15 +4,15 @@ import Link from 'next/link';
 import { SupportCard } from '@/components/support-card';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — HA Health Sync',
+  title: 'Privacy Policy — Vital Relay',
   description:
-    'How HA Health Sync handles Apple Health data, Home Assistant credentials, local storage, diagnostics, and deletion.',
+    'How Vital Relay handles Apple Health data, Home Assistant credentials, local storage, diagnostics, and deletion.',
   alternates: { canonical: '/privacy' },
   openGraph: {
     url: '/privacy',
-    title: 'Privacy Policy — HA Health Sync',
+    title: 'Privacy Policy — Vital Relay',
     description:
-      'How HA Health Sync handles Apple Health data, Home Assistant credentials, local storage, diagnostics, and deletion.',
+      'How Vital Relay handles Apple Health data, Home Assistant credentials, local storage, diagnostics, and deletion.',
   },
 };
 
@@ -56,7 +56,7 @@ const sections = [
     body: (
       <>
         <p>
-          HA Health Sync requests read access only to the Apple Health data
+          Vital Relay requests read access only to the Apple Health data
           types you select. It requests write access only for supported
           HealthKit destinations you explicitly configure from Home Assistant.
           On supported iOS versions, medication access uses Apple&apos;s
@@ -75,7 +75,7 @@ const sections = [
     body: (
       <>
         <p>
-          HA Health Sync does not send health data, credentials, diagnostics, or
+          Vital Relay does not send health data, credentials, diagnostics, or
           usage information to Oleh Vdovenko or to project-operated
           infrastructure. When you enable synchronization, the app sends
           selected data directly to the Home Assistant destination you
@@ -151,7 +151,7 @@ const sections = [
       <>
         <p>
           Apple Health, iOS, Home Assistant, and any integrations you install
-          are governed by their own terms and privacy practices. HA Health Sync
+          are governed by their own terms and privacy practices. Vital Relay
           does not use health data for advertising, marketing, profiling, or
           data mining and does not share it with data brokers.
         </p>
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
           <p className="eyebrow">Effective 27 September 2026</p>
           <h1 className="section-title mt-4">Privacy Policy</h1>
           <p className="section-copy">
-            HA Health Sync is designed so the developer does not receive your
+            Vital Relay is designed so the developer does not receive your
             health data. This policy explains the app&apos;s direct data flow
             and the controls available to you.
           </p>
@@ -182,7 +182,7 @@ export default function PrivacyPage() {
           <section>
             <h2>Developer and contact</h2>
             <p>
-              HA Health Sync is developed by Oleh Vdovenko. Questions about this
+              Vital Relay is developed by Oleh Vdovenko. Questions about this
               policy can be sent to{' '}
               <a href="mailto:o@olhapi.com">o@olhapi.com</a>.
             </p>

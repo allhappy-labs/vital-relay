@@ -1,6 +1,6 @@
-# Health Sync
+# Vital Relay
 
-Health Sync sends selected Apple Health data from your iPhone to your own [Home Assistant](https://www.home-assistant.io/) through [Health Bridge](https://github.com/allhappy-labs/Health_Bridge). Choose what iOS may share, sync on demand, or use the lifetime unlock for best-effort background and Shortcuts sync. On supported iOS and Health Bridge versions, Historical Import can archive each metric from its earliest readable HealthKit sample. The app has no account or hosted health-data service; HealthKit permissions and Home Assistant authentication remain under your control.
+Vital Relay sends selected Apple Health data from your iPhone to your own [Home Assistant](https://www.home-assistant.io/) through [Health Bridge](https://github.com/allhappy-labs/Health_Bridge). Choose what iOS may share, sync on demand, or use the lifetime unlock for best-effort background and Shortcuts sync. On supported iOS and Health Bridge versions, Historical Import can archive each metric from its earliest readable HealthKit sample. The app has no account or hosted health-data service; HealthKit permissions and Home Assistant authentication remain under your control.
 
 ## In the app
 
@@ -60,4 +60,4 @@ The protocol-2 app and fork passed local automated and disposable Home Assistant
 
 ## License and upstream
 
-Health Sync is licensed under [MIT](LICENSE). The Health Bridge fork is a separate MIT-licensed derivative of [gregt1993/Health_Bridge](https://github.com/gregt1993/Health_Bridge), preserving its upstream history and attribution. MIT permits commercial reuse and modified distributions; it does not require contributors to publish their changes.
+Vital Relay is licensed under [MIT](LICENSE). The Health Bridge fork is a separate MIT-licensed derivative of [gregt1993/Health_Bridge](https://github.com/gregt1993/Health_Bridge), preserving its upstream history and attribution. MIT permits commercial reuse and modified distributions; it does not require contributors to publish their changes.

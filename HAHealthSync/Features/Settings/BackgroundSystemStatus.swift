@@ -49,7 +49,7 @@ struct BackgroundSyncBlocker: Equatable {
     switch refresh {
     case .denied:
       return .init(
-        message: "Background App Refresh is off for Health Sync.", offersSettings: true)
+        message: "Background App Refresh is off for Vital Relay.", offersSettings: true)
     case .restricted:
       return .init(
         message: "Background App Refresh is restricted on this iPhone.", offersSettings: false)

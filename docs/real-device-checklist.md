@@ -41,7 +41,7 @@ Do not describe HealthKit background synchronization as reliable until the backg
 
 - [ ] The device build sets `ENABLE_DEBUG_DYLIB=NO`. Without it, App Intents metadata is skipped at build time and Shortcuts cannot find or run the App Shortcut (this happened on 14 Sep).
 - [ ] Shortcuts discovers “Sync Health with Home Assistant.”
-- [ ] The phrase “Sync Health with Home Assistant in HA Health Sync” invokes the shortcut.
+- [ ] The phrase “Sync Health with Home Assistant in Vital Relay” invokes the shortcut.
 - [ ] Shortcut success returns only synchronized metric and pairing counts.
 - [ ] Shortcut failure returns only a concise category and exposes no metric value, URL, token, secret, or response body.
 - [ ] Manual, pull-to-refresh, background, and Shortcut triggers all use the same anchors and do not overlap the same metric transaction.

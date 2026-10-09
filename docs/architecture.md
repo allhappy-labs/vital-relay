@@ -1,6 +1,6 @@
 # Architecture
 
-HA Health Sync separates platform adapters from a deterministic Swift package so synchronization policy can be tested without an iPhone or Home Assistant instance.
+Vital Relay separates platform adapters from a deterministic Swift package so synchronization policy can be tested without an iPhone or Home Assistant instance.
 
 ## Boundaries
 

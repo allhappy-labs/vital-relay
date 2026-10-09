@@ -20,7 +20,7 @@ struct PrivacyStepView: View {
           .font(.largeTitle.bold())
 
         Text(
-          "Health Sync processes data on this iPhone and sends it directly to your own Home Assistant instance. There are no accounts, analytics, advertisements, cloud storage, or external servers."
+          "Vital Relay processes data on this iPhone and sends it directly to your own Home Assistant instance. There are no accounts, analytics, advertisements, cloud storage, or external servers."
         )
 
         Label {

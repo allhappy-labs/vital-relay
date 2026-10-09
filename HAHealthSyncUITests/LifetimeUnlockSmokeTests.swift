@@ -66,7 +66,7 @@ final class LifetimeUnlockSmokeTests: XCTestCase {
 
     let buy = app.buttons["lifetime-unlock-buy"]
     XCTAssertTrue(buy.waitForExistence(timeout: UITestWait.standard))
-    XCTAssertTrue(buy.label.contains("CHF"))
+    XCTAssertTrue(buy.label.contains("$10.00"))
     buy.tap()
     let message = app.staticTexts["lifetime-unlock-message"]
     XCTAssertTrue(message.waitForExistence(timeout: UITestWait.standard))

@@ -38,7 +38,7 @@ struct DashboardView: View {
         .padding(.bottom, 24)
       }
       .background(Color(uiColor: .systemGroupedBackground))
-      .navigationTitle("Health Sync")
+      .navigationTitle("Vital Relay")
       .toolbar {
         ToolbarItem(placement: .primaryAction) {
           NavigationLink {
